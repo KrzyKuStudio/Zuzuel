@@ -158,14 +158,10 @@ namespace Zuzel
 
         public void Update(GameTime gameTime)
         {
-
             if (Active == true)
             {
                 drawRectangle.X += (int)velocity.X;
                 drawRectangle.Y += (int)velocity.Y;
-
-
-
             }
         }
 

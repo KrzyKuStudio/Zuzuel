@@ -16,6 +16,8 @@ namespace Zuzel
         public const float MOTOR_ANGLE = 0.05F;
         public const float MOTOR_ACC_SPEED = 0.4F;
 
+        public const int LAPS_NUMBER = 1;
+
         // display support
         public const bool VISIBLEMOUSE = true;
         public const int DISPLAY_OFFSET = 15;

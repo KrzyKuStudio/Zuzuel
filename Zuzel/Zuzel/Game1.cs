@@ -25,13 +25,37 @@ public class Game1 : Microsoft.Xna.Framework.Game
     Rectangle mapRectangle;
     Vector2 mapPosition;
     Color[] mapGradTextureData;
+    Texture2D finishRectangle;
+    Rectangle finishMapRectangle;
+    
+    //checkpoints
+    Rectangle checkPointARectangle;
+    Rectangle checkPointBRectangle;
+    Rectangle checkPointCRectangle;
+    Rectangle checkPointDRectangle;
 
-
+    List<Rectangle> checkPointsList;
+    
     Motor motorRed;
     Motor motorGreen;
     Motor motorYellow;
     Motor motorBlue;
     List<Motor> motors = new List<Motor>();
+
+    Laps lapsMotorRed;
+    Laps lapsMotorGreen;
+    Laps lapsMotorYellow;
+    Laps lapsMotorBlue;
+    List<Laps> laps = new List<Laps>();
+
+    
+    //clock
+    int clock;
+    int clock_elapsed;
+
+
+    //fonts
+    SpriteFont fontArial10;
 
     //Gamestate
     public enum GameState
@@ -39,7 +63,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
         NewGame,
         Playing,
         GameOver,
-        StartGame
+        StartGame,
+        Intro
     }
 
     GameState gameState;
@@ -86,7 +111,6 @@ public class Game1 : Microsoft.Xna.Framework.Game
             (int)(viewport.Width * (1 - 2 * SafeAreaPortion)),
             (int)(viewport.Height * (1 - 2 * SafeAreaPortion)));
        
-       
     }
 
 
@@ -107,6 +131,23 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
         // Get the bounding rectangle of this block
         mapRectangle = new Rectangle(0, 0, mapTexture.Width, mapTexture.Height);
+
+        finishMapRectangle = new Rectangle(457, 335, 1, 130);
+        
+        //Creating and adding checkpointto list
+        checkPointsList = new List<Rectangle>();
+        checkPointARectangle = new Rectangle(575, 35, 1, 135);
+        checkPointBRectangle = new Rectangle(575, 332, 1, 135);
+        checkPointCRectangle = new Rectangle(205, 35, 1, 135);
+        checkPointDRectangle = new Rectangle(200, 332, 1, 135);
+
+        checkPointsList.Add(checkPointARectangle);
+        checkPointsList.Add(checkPointBRectangle);
+        checkPointsList.Add(checkPointCRectangle);
+        checkPointsList.Add(checkPointDRectangle);
+
+        //fonts
+        fontArial10 = Content.Load<SpriteFont>("fonts\\Arial10");
         
     }
 
@@ -121,6 +162,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
         // Get input
         KeyboardState keyboard = Keyboard.GetState();
         GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
+
 
         // Allows the game to exit
         if (gamePad.Buttons.Back == ButtonState.Pressed ||
@@ -140,18 +182,30 @@ public class Game1 : Microsoft.Xna.Framework.Game
         if (gameState == GameState.NewGame)
         {
             motors.Clear();
-           
-            motorRed = new Motor(Content, "image\\motorred", (int)GameConstants.START_POS_RED.X,
+            laps.Clear();
+            motorRed = new Motor("Red Motor",Content, "image\\motorred", (int)GameConstants.START_POS_RED.X,
             (int)GameConstants.START_POS_RED.Y, new Vector2(0, 0), null);
             motors.Add(motorRed);
             
-            motorYellow = new Motor(Content, "image\\motoryellow", (int)GameConstants.START_POS_RED.X,
+            motorYellow = new Motor("Yellow Motor",Content, "image\\motoryellow", (int)GameConstants.START_POS_RED.X,
            (int)GameConstants.START_POS_RED.Y+30, new Vector2(0, 0), null);
             motors.Add(motorYellow);
 
+            gameState = GameState.StartGame;
+        }
+        #endregion
 
+        //start game
+        #region
+        if(gameState == GameState.StartGame)
+        {
+            clock = (int)gameTime.TotalGameTime.TotalMilliseconds;
 
-
+            lapsMotorRed = new Laps(motorRed, checkPointsList, finishMapRectangle, GameConstants.LAPS_NUMBER, clock);
+            laps.Add(lapsMotorRed);
+            lapsMotorYellow = new Laps(motorYellow, checkPointsList, finishMapRectangle, GameConstants.LAPS_NUMBER, clock);
+            laps.Add(lapsMotorYellow);
+                        
             gameState = GameState.Playing;
         }
         #endregion
@@ -165,7 +219,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 motorek.AngleVelocity = 0.0F;
                 motorek.Turning = false;
             }
-
+            clock_elapsed = (int)gameTime.TotalGameTime.TotalMilliseconds;
             // Move the player 
             #region
             //RED
@@ -230,9 +284,13 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 motorek.Update(gameTime);
             }
 
-        }
+            foreach(Laps lap in laps)
+            {
+                lap.Update(gameTime, clock_elapsed -clock);
+            }
+                 }
         #endregion
-
+        
         base.Update(gameTime);
     }
 
@@ -260,7 +318,14 @@ public class Game1 : Microsoft.Xna.Framework.Game
 
             spriteBatch.Draw(Content.Load<Texture2D>("image\\motorred"), new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2), Color.White);
         }
-       
+
+        //draw checkpoints
+        //DrawCheckpoints();
+        spriteBatch.DrawString(fontArial10, "GameTime " + DisplayClock(clock_elapsed-clock), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 2.1F), Color.White);
+
+        spriteBatch.DrawString(fontArial10, "Red laps: " + lapsMotorRed.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString()+"Time: "+DisplayClock(lapsMotorRed.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.7F), Color.White);
+
+        spriteBatch.DrawString(fontArial10, "Yellow laps: " + lapsMotorYellow.CurrentLap +"/"+GameConstants.LAPS_NUMBER.ToString(), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.9F), Color.White);
 
 
         spriteBatch.End();
@@ -270,4 +335,34 @@ public class Game1 : Microsoft.Xna.Framework.Game
     }
 
 
+    private void DrawCheckpoints()
+    {
+        //draw finishrectangle
+        finishRectangle = new Texture2D(GraphicsDevice, 1, 1);
+        finishRectangle.SetData(new[] { Color.White });
+        spriteBatch.Draw(finishRectangle,finishMapRectangle, Color.Chocolate);
+
+        //draw checkpoint
+        spriteBatch.Draw(finishRectangle, checkPointARectangle, Color.Chocolate);
+        spriteBatch.Draw(finishRectangle, checkPointBRectangle, Color.Chocolate);
+        spriteBatch.Draw(finishRectangle, checkPointCRectangle, Color.Chocolate);
+        spriteBatch.Draw(finishRectangle, checkPointDRectangle, Color.Chocolate);
+    }
+
+    private string DisplayClock(int clock)
+    {
+        string time;
+        time = ((((clock)/60000)%60)).ToString()+":"+
+               (((clock) %60000)/1000).ToString()+":"+
+               (((clock) %1000)/10).ToString();
+
+
+        //int min = 
+        //time = (gameTime.TotalGameTime.Minutes-clock[0]).ToString()+":"+
+        //         (gameTime.TotalGameTime.Seconds-clock[1]).ToString()+":"+
+        //         (gameTime.TotalGameTime.Milliseconds-clock[2]).ToString();
+        
+        
+        return time;
+    }
 }}

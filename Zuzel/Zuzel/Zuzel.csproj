@@ -74,6 +74,7 @@
   <ItemGroup>
     <Compile Include="Intersect.cs" />
     <Compile Include="GameConstants.cs" />
+    <Compile Include="Laps.cs" />
     <Compile Include="Motor.cs" />
     <Compile Include="Objekt.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

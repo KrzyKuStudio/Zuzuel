@@ -19,14 +19,16 @@ namespace Zuzel
         float friction;
         float accSpeed;
         bool turning;
+        string motorName;
 
-          public Motor(ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
+          public Motor(string name,ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
             SoundEffect shootSound) : base(contentManager, spriteName, x, y, velocity, shootSound)
             {
               this.angle = 0;  
               this.angleVelocity = 0;
               this.friction = 0.04F;
               this.accSpeed = 0.4F;
+              this.motorName = name;
             }
         
           public bool Thrust
@@ -63,13 +65,13 @@ namespace Zuzel
          
 
         }
-          public Vector2 AngleToVector(float angle)
+          private Vector2 AngleToVector(float angle)
 {
       Vector2 vectorek = new Vector2 ((float)Math.Cos(angle),(float)Math.Sin(angle));
       return vectorek;
 }
 
-          public double distance(Vector2 point1, Vector2 point2)
+          private double distance(Vector2 point1, Vector2 point2)
           {
               return Math.Sqrt((point1.X - point2.X) * (point1.X - point2.X) + (point1.Y - point2.Y) * (point1.Y - point2.Y));
           }
