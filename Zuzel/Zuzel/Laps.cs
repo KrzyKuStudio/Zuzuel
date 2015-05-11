@@ -9,7 +9,6 @@ namespace Zuzel
     class Laps
     {
         List<Rectangle> checkPointList;
-        List<float> lapsTime;
         int lapTime;
         Motor motor;
         int lapCount;
@@ -19,6 +18,7 @@ namespace Zuzel
         Rectangle finishMapRectangle;
         int clock;
         int clock_elapsed;
+        bool finishedRace;
 
         public int CurrentLap
         {
@@ -30,6 +30,11 @@ namespace Zuzel
         {
             get { return lapTime; }
             set { lapTime = value; }
+        }
+        public string MotorName
+        {
+            get { return motor.MotorName; }
+            
         }
 
         public Laps(Motor motor, List<Rectangle> checkPointList, Rectangle finishMapRectangle, int lapsNumber, int clock)
@@ -46,9 +51,9 @@ namespace Zuzel
             }
             this.lapTime = 0;
             this.clock = clock;
-            
+            finishedRace = false;
         }
-
+        
         public bool CheckCheckPoints()
         {
                         
@@ -86,6 +91,7 @@ namespace Zuzel
                 if(currentLap>=lapCount)
                 {
                     motor.Active = false;
+                    this.finishedRace = true;
                     this.lapTime = clock ;
                 }
                 this.currentLap++;

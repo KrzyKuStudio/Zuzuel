@@ -36,6 +36,11 @@ namespace Zuzel
               get { return thrust; }
               set { thrust = value; }
           }
+          public string MotorName
+          {
+              get { return motorName; }
+             
+          }
         public float AngleVelocity
           {
               get { return angleVelocity; }

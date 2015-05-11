@@ -48,11 +48,18 @@ public class Game1 : Microsoft.Xna.Framework.Game
     Laps lapsMotorBlue;
     List<Laps> laps = new List<Laps>();
 
+    AIMotorMovement aiYellow;
+    AIMotorMovement aiBlue;
+    AIMotorMovement aiGreen;
+    List<AIMotorMovement> aiMovement = new List<AIMotorMovement>(); 
+    string winner;
+    Motor winnerMotor;
     
     //clock
     int clock;
     int clock_elapsed;
-
+    
+    int allMotorsActive;
 
     //fonts
     SpriteFont fontArial10;
@@ -67,6 +74,14 @@ public class Game1 : Microsoft.Xna.Framework.Game
         Intro
     }
 
+    public enum Players
+    {
+        AI,
+        Player1,
+        Player2
+    }
+
+    Players player2;
     GameState gameState;
 
     // The images will be drawn with this SpriteBatch
@@ -84,6 +99,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
     {
         graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
+
 
         IsMouseVisible = GameConstants.VISIBLEMOUSE;
         // set resolution
@@ -123,9 +139,25 @@ public class Game1 : Microsoft.Xna.Framework.Game
         // Create a sprite batch to draw those textures
         spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
         
-        //personTexture = Content.Load<Texture2D>("image\\motorred");
-        mapTexture = Content.Load<Texture2D>("image\\map");
-        mapGradTexture = Content.Load<Texture2D>("image\\mapgrad");
+       
+        try
+        {
+            mapTexture = Content.Load<Texture2D>("image\\map");
+            mapGradTexture = Content.Load<Texture2D>("image\\mapgrad");
+            //fonts
+            fontArial10 = Content.Load<SpriteFont>("fonts\\Arial10");
+        }
+       
+        catch 
+        {
+           this.Exit();
+        }
+        if (mapTexture == null || mapGradTexture == null || fontArial10 == null)
+            {
+                this.Exit();
+            }
+        
+      
         mapGradTextureData = new Color[mapGradTexture.Width * mapGradTexture.Height];
         mapGradTexture.GetData(mapGradTextureData);
 
@@ -146,8 +178,6 @@ public class Game1 : Microsoft.Xna.Framework.Game
         checkPointsList.Add(checkPointCRectangle);
         checkPointsList.Add(checkPointDRectangle);
 
-        //fonts
-        fontArial10 = Content.Load<SpriteFont>("fonts\\Arial10");
         
     }
 
@@ -183,15 +213,47 @@ public class Game1 : Microsoft.Xna.Framework.Game
         {
             motors.Clear();
             laps.Clear();
-            motorRed = new Motor("Red Motor",Content, "image\\motorred", (int)GameConstants.START_POS_RED.X,
-            (int)GameConstants.START_POS_RED.Y, new Vector2(0, 0), null);
-            motors.Add(motorRed);
+            int index,pos;
+            List<int> positions = new List<int>();
+            positions.Add(0);
+            positions.Add(1);
+            positions.Add(2);
+            positions.Add(3);
             
+            pos = random.Next(positions.Count );
+            index = positions[pos];
+            positions.RemoveAt(pos);
+            motorRed = new Motor("Red Motor",Content, "image\\motorred", (int)GameConstants.START_POS_RED.X,
+            (int)GameConstants.START_POS_RED.Y + 27*index, new Vector2(0, 0), null);
+            motors.Add(motorRed);
+          
+            pos = random.Next(positions.Count );
+            index = positions[pos];
+            positions.RemoveAt(pos);
             motorYellow = new Motor("Yellow Motor",Content, "image\\motoryellow", (int)GameConstants.START_POS_RED.X,
-           (int)GameConstants.START_POS_RED.Y+30, new Vector2(0, 0), null);
+           (int)GameConstants.START_POS_RED.Y + 27  *index, new Vector2(0, 0), null);
             motors.Add(motorYellow);
 
+            pos = random.Next(positions.Count );
+            index = positions[pos];
+            positions.RemoveAt(pos);
+            motorBlue = new Motor("Blue Motor", Content, "image\\motorblue", (int)GameConstants.START_POS_RED.X,
+         (int)GameConstants.START_POS_RED.Y + 27*index, new Vector2(0, 0), null);
+            motors.Add(motorBlue);
+
+            pos = random.Next(positions.Count );
+            index = positions[pos];
+            positions.RemoveAt(pos);
+            motorGreen = new Motor("Green Motor", Content, "image\\motorgreen", (int)GameConstants.START_POS_RED.X,
+(int)GameConstants.START_POS_RED.Y + 27*index, new Vector2(0, 0), null);
+            motors.Add(motorGreen);
+
+            aiGreen = new AIMotorMovement(motorGreen, checkPointsList);
+            aiBlue = new AIMotorMovement(motorBlue, checkPointsList);
+            aiYellow = new AIMotorMovement(motorYellow, checkPointsList);
+
             gameState = GameState.StartGame;
+            player2 = Players.AI;
         }
         #endregion
 
@@ -243,54 +305,89 @@ public class Game1 : Microsoft.Xna.Framework.Game
             {
                 motorRed.Thrust = false;
             }
-
-            //YELLOW
-            if (keyboard.IsKeyDown(Keys.A))
+            //Yellow motor player or AI
+            if (player2 == Players.Player2)
             {
-                motorYellow.AngleVelocity = -GameConstants.MOTOR_ANGLE;
-                motorYellow.Turning = true;
 
-            }
-            if (keyboard.IsKeyDown(Keys.D))
-            {
-                motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
-                motorYellow.Turning = true;
+                //YELLOW
+                if (keyboard.IsKeyDown(Keys.A))
+                {
+                    motorYellow.AngleVelocity = -GameConstants.MOTOR_ANGLE;
+                    motorYellow.Turning = true;
 
-            }
-            if (keyboard.IsKeyDown(Keys.W))
-            {
-                motorYellow.Thrust = true;
+                }
+                if (keyboard.IsKeyDown(Keys.D))
+                {
+                    motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                    motorYellow.Turning = true;
+
+                }
+                if (keyboard.IsKeyDown(Keys.W))
+                {
+                    motorYellow.Thrust = true;
+                }
+                else
+                {
+                    motorYellow.Thrust = false;
+                }
             }
             else
             {
-                motorYellow.Thrust = false;
+                //AI Yellow
+                aiYellow.Update(gameTime);
             }
+         
+
             #endregion
 
             // Check collision with mapborder
+            allMotorsActive = motors.Count();
             foreach (Motor motorek in motors)
             {
+                if(!motorek.Active) allMotorsActive-=1;
 
                 if (Intersect.IntersectPixels(motorek.DrawRectangle, motorek.TextureData,
                                   mapRectangle, mapGradTextureData))
                 {
-                    gameState = GameState.GameOver;
-                    motorek.Active = false;
+                   motorek.Active = false;
                 }
-                else
-                {
-                    gameState = GameState.Playing;
-                }
+                
                 motorek.Update(gameTime);
             }
-
+            if (allMotorsActive==0)
+            {
+                gameState = GameState.GameOver;
+            }
             foreach(Laps lap in laps)
             {
-                lap.Update(gameTime, clock_elapsed -clock);
+                lap.Update(gameTime, clock_elapsed - clock);
             }
+
+        }
+        #endregion
+
+        //game over
+        #region
+        if(gameState == GameState.GameOver)
+        {
+            List<int> temporaryList = new List<int>();
+            foreach(Laps lap in laps)
+            {
+                temporaryList.Add(lap.LapTime);
+            }
+
+             try
+             {
+                 //linq where min of list without 0
+                 winner = laps[temporaryList.IndexOf(temporaryList.Where(f => f > 0).Min())].MotorName;
+                        
+             }
+            catch
+             {
+                 winner = "Nobody ended the race";
+             }
                  }
         #endregion
-        
         base.Update(gameTime);
     }
 
@@ -313,21 +410,20 @@ public class Game1 : Microsoft.Xna.Framework.Game
             motorek.Draw(spriteBatch);
         }
        
-        if (gameState == GameState.GameOver)
-        {
 
-            spriteBatch.Draw(Content.Load<Texture2D>("image\\motorred"), new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2), Color.White);
-        }
 
         //draw checkpoints
-        //DrawCheckpoints();
+        DrawCheckpoints();
         spriteBatch.DrawString(fontArial10, "GameTime " + DisplayClock(clock_elapsed-clock), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 2.1F), Color.White);
+        spriteBatch.DrawString(fontArial10, "Yellow laps: " + lapsMotorYellow.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString()+ "Time: " + DisplayClock(lapsMotorYellow.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.9F), Color.White);
+        spriteBatch.DrawString(fontArial10, "Red laps: " + lapsMotorRed.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString() + "Time: " + DisplayClock(lapsMotorRed.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.7F), Color.White);
 
-        spriteBatch.DrawString(fontArial10, "Red laps: " + lapsMotorRed.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString()+"Time: "+DisplayClock(lapsMotorRed.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.7F), Color.White);
-
-        spriteBatch.DrawString(fontArial10, "Yellow laps: " + lapsMotorYellow.CurrentLap +"/"+GameConstants.LAPS_NUMBER.ToString(), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.9F), Color.White);
-
-
+       
+        if(gameState == GameState.GameOver)
+        {
+            spriteBatch.DrawString(fontArial10, "Winner: " + winner, new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 2.3F), Color.White);
+            spriteBatch.Draw(Content.Load<Texture2D>("image\\motorred"), new Vector2(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2), Color.White);
+        }
         spriteBatch.End();
 
 
@@ -355,14 +451,10 @@ public class Game1 : Microsoft.Xna.Framework.Game
         time = ((((clock)/60000)%60)).ToString()+":"+
                (((clock) %60000)/1000).ToString()+":"+
                (((clock) %1000)/10).ToString();
-
-
-        //int min = 
-        //time = (gameTime.TotalGameTime.Minutes-clock[0]).ToString()+":"+
-        //         (gameTime.TotalGameTime.Seconds-clock[1]).ToString()+":"+
-        //         (gameTime.TotalGameTime.Milliseconds-clock[2]).ToString();
-        
         
         return time;
     }
+
+
+   
 }}
