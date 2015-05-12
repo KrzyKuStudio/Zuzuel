@@ -46,6 +46,11 @@ namespace Zuzel
               get { return angleVelocity; }
               set { angleVelocity = value; }
           }
+        public float Angle
+        {
+            get { return angle; }
+            set { angle = value ; }
+        }
 
         public bool Turning
         {
@@ -66,14 +71,15 @@ namespace Zuzel
             Vector2 origin = new Vector2(drawRectangle.Width/2, drawRectangle.Height/2);
             Vector2 position = new Vector2(drawRectangle.X, drawRectangle.Y);
             //spriteBatch.Draw(sprite, drawRectangle, Color.White);
-            spriteBatch.Draw(sprite, position + origin, null, Color.White, angle, origin, 1F, SpriteEffects.None, 0F);
+            spriteBatch.Draw(sprite, position + origin, null, Color.White, -angle, origin, 1F, SpriteEffects.None, 0F);
          
 
         }
           private Vector2 AngleToVector(float angle)
 {
-      Vector2 vectorek = new Vector2 ((float)Math.Cos(angle),(float)Math.Sin(angle));
-      return vectorek;
+      Vector2 vectorek = new Vector2 ((float)Math.Cos(angle),-(float)Math.Sin(angle));
+ 
+              return vectorek;
 }
 
           private double distance(Vector2 point1, Vector2 point2)
@@ -88,7 +94,9 @@ namespace Zuzel
               {
                   this.drawRectangle.X += (int)velocity.X;
                   this.drawRectangle.Y += (int)velocity.Y;
-                  this.angle += this.angleVelocity;
+
+                  this.angle +=  this.angleVelocity;
+                  this.angle = this.angle % ((float)Math.PI * 2);
                   
                   Vector2 fowardVelocity = AngleToVector(this.angle);
                   this.velocity.X *= (1 - this.friction);
@@ -96,8 +104,8 @@ namespace Zuzel
 
                   if(thrust)
                   {
-                      this.velocity.X += accSpeed * fowardVelocity.X;
-                      this.velocity.Y += accSpeed * fowardVelocity.Y;
+                      this.velocity.X += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.X;
+                      this.velocity.Y += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.Y;
                       
                   }
                   if(turning)

@@ -12,31 +12,36 @@ namespace Zuzel
 {
     class AIMotorMovement
     {
-        List<Rectangle> checkPointList;
+        List<Rectangle> checkPointListAi;
         Motor motor;
         int lapCount;
         int currentLap;
         List<int> currentLapCheckpoints;
         int currentCheckpoint;
+        Random random = new Random();
+        
 
-        public AIMotorMovement(Motor motor, List<Rectangle> checkPointList)
+        public AIMotorMovement(Motor motor, List<Rectangle> checkPointListAi)
         {
-            this.checkPointList = checkPointList;
+            this.checkPointListAi = checkPointListAi;
             this.motor = motor;
             this.currentLap = 1;
             this.motor.Thrust = true;
+            this.motor.Turning = true;
             this.currentCheckpoint = 0;
-            currentLapCheckpoints = new List<int>();
-            foreach(Rectangle rectangle in checkPointList);
+
+            
+            this.currentLapCheckpoints = new List<int>();
+            foreach(Rectangle rectangle in this.checkPointListAi)
             {
-                currentLapCheckpoints.Add(0);
+                this.currentLapCheckpoints.Add(0);
             }
         }
 
         public bool CheckCheckPoints()
         {
 
-            if (currentLapCheckpoints.Min() > 0)
+            if (this.currentLapCheckpoints.Min() > 0)
             {
                 return true;
             }
@@ -46,54 +51,99 @@ namespace Zuzel
 
         public void Update(GameTime gameTime)
         {
-            Target(checkPointList[currentCheckpoint]);
+            Target(this.checkPointListAi[this.currentCheckpoint],gameTime);
 
-            for (int idx = 0; idx < currentLapCheckpoints.Count(); idx++)
-            {
-                if (motor.CollisionRectangle.Intersects(checkPointList[idx]))
+            //for (int idx = 0; idx < this.currentLapCheckpoints.Count(); idx++)
+         //   {
+            if (this.motor.CollisionRectangle.Intersects(checkPointListAi[this.currentCheckpoint]) && this.currentLapCheckpoints[this.currentCheckpoint] == 0)
                 {
-                    currentLapCheckpoints[idx] = 1;
+                    this.currentLapCheckpoints[this.currentCheckpoint] = 1;
+                    this.currentCheckpoint++;
+                   
                 }
-            }
+         //   }
             if (CheckCheckPoints())
             {
-
-                currentLapCheckpoints.Clear();
-                foreach (Rectangle rectangle in checkPointList) 
+                this.currentLapCheckpoints.Clear();
+                this.currentCheckpoint = 0;
+                foreach (Rectangle rectangle in this.checkPointListAi) 
                 {
-                    currentLapCheckpoints.Add(0);
+                    this.currentLapCheckpoints.Add(0);
                 }
-                              
+             }
+        }
+
+        private void Target(Rectangle targetRectangle, GameTime gameTime)
+        {
+
+            Vector2 difference = new Vector2(targetRectangle.Center.X - this.motor.DrawRectangle.Center.X + random.Next(-30, 30), targetRectangle.Center.Y - this.motor.DrawRectangle.Center.Y + random.Next(-30, 30));
+
+            difference.Normalize();
+
+            Console.WriteLine("target" + currentCheckpoint);
+            ////Console.WriteLine("target"+targetRectangle);
+            //Console.WriteLine("motor ang" + this.motor.Angle);
+            //Console.WriteLine("vevv to angk" + VectorToAngle(difference));
+            //Console.WriteLine("diff" + (difference));
+            if (gameTime.TotalGameTime.Milliseconds % 20 == 0)
+            {
+                double temp_angle =this.motor.Angle;
+                if(temp_angle >= (Math.PI*1.5D))
+                {
+                   
+                    temp_angle= temp_angle - Math.PI;
+                }
+                
+                else if (temp_angle <= -(Math.PI /2D))
+                {
+
+                    temp_angle = temp_angle + 2*Math.PI;
+                }
+                
+                
+                if (temp_angle >= VectorToAngle(difference))
+                {
+                    this.motor.AngleVelocity = -0.15F;
+                }
+
+                else 
+                {
+                    this.motor.AngleVelocity = 0.15F;
+                }
+
+                //this.motor.Velocity += difference;
+                //this.motor.AngleVelocity = 0.04F;
+
+                // this.motor.Angle = VectorToAngle(difference);
+            }
+            if (gameTime.TotalGameTime.Milliseconds % 4 == 0)
+            {
+                this.motor.Thrust = true;
+            }
+            else
+            {
+                this.motor.Thrust = false;
             }
 
-//            float orcSpeed = .2f;  //the orc's current speed
- 
-//public void Update(GameTime gameTime)
-//{
-     
-//    //get the difference from orc to player
-//    Vector2 differenceToPlayer = playerPosition - orcPosition;
-     
-//    //** Move the orc towards the player **
-//    //first get direction only by normalizing the difference vector
-//    //getting only the direction, with a length of one
-//    differenceToPlayer.Normalize();
- 
-//    //then move in that direction
-//    //based on how much time has passed
-//    orcPosition  += differenceToPlayer * (float)gameTime.ElapsedGameTime.TotalMilliseconds * orcSpeed;
- 
-//}
-
-
         }
-   
-        private void Target(Rectangle targetRectangle)
+
+
+
+        private Vector2 AngleToVector(float angle)
         {
-       Vector2 difference = new Vector2(targetRectangle.X - this.motor.DrawRectangle.X, targetRectangle.Y - this.motor.DrawRectangle.Y);
-       difference.Normalize();
-       this.motor.Velocity += difference; ;
+            Vector2 vectorek = new Vector2((float)Math.Cos(angle), -(float)Math.Sin(angle));
+
+            return vectorek;
         }
-    
+
+        float VectorToAngle(Vector2 vector)
+        {
+            return (float)Math.Atan2(-vector.X, -vector.Y) + (float)Math.PI / 2;
+        }
+
+        //float VectorToAngle(Vector2 vector)
+        //{
+        //    return (float)Math.Atan2(vector.X, -vector.Y);
+        //}
     }
 }

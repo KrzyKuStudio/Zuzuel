@@ -28,14 +28,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
     Texture2D finishRectangle;
     Rectangle finishMapRectangle;
     
-    //checkpoints
-    Rectangle checkPointARectangle;
-    Rectangle checkPointBRectangle;
-    Rectangle checkPointCRectangle;
-    Rectangle checkPointDRectangle;
-
     List<Rectangle> checkPointsList;
-    
+    List<Rectangle> checkAiPointsList;
     Motor motorRed;
     Motor motorGreen;
     Motor motorYellow;
@@ -167,18 +161,8 @@ public class Game1 : Microsoft.Xna.Framework.Game
         finishMapRectangle = new Rectangle(457, 335, 1, 130);
         
         //Creating and adding checkpointto list
-        checkPointsList = new List<Rectangle>();
-        checkPointARectangle = new Rectangle(575, 35, 1, 135);
-        checkPointBRectangle = new Rectangle(575, 332, 1, 135);
-        checkPointCRectangle = new Rectangle(205, 35, 1, 135);
-        checkPointDRectangle = new Rectangle(200, 332, 1, 135);
-
-        checkPointsList.Add(checkPointARectangle);
-        checkPointsList.Add(checkPointBRectangle);
-        checkPointsList.Add(checkPointCRectangle);
-        checkPointsList.Add(checkPointDRectangle);
-
-        
+        CheckPoints();
+                
     }
 
 
@@ -248,9 +232,9 @@ public class Game1 : Microsoft.Xna.Framework.Game
 (int)GameConstants.START_POS_RED.Y + 27*index, new Vector2(0, 0), null);
             motors.Add(motorGreen);
 
-            aiGreen = new AIMotorMovement(motorGreen, checkPointsList);
-            aiBlue = new AIMotorMovement(motorBlue, checkPointsList);
-            aiYellow = new AIMotorMovement(motorYellow, checkPointsList);
+            aiGreen = new AIMotorMovement(motorGreen, checkAiPointsList);
+            aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList);
+            aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList);
 
             gameState = GameState.StartGame;
             player2 = Players.AI;
@@ -287,13 +271,13 @@ public class Game1 : Microsoft.Xna.Framework.Game
             //RED
             if (keyboard.IsKeyDown(Keys.Left) )
             {
-                motorRed.AngleVelocity =  -GameConstants.MOTOR_ANGLE;
+                motorRed.AngleVelocity =  GameConstants.MOTOR_ANGLE;
                 motorRed.Turning = true;
 
             }
             if (keyboard.IsKeyDown(Keys.Right) )
             {
-                motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                motorRed.AngleVelocity = -GameConstants.MOTOR_ANGLE;
                 motorRed.Turning = true;
 
             }
@@ -312,13 +296,13 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 //YELLOW
                 if (keyboard.IsKeyDown(Keys.A))
                 {
-                    motorYellow.AngleVelocity = -GameConstants.MOTOR_ANGLE;
+                    motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
                     motorYellow.Turning = true;
 
                 }
                 if (keyboard.IsKeyDown(Keys.D))
                 {
-                    motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                    motorYellow.AngleVelocity = -GameConstants.MOTOR_ANGLE;
                     motorYellow.Turning = true;
 
                 }
@@ -336,8 +320,9 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 //AI Yellow
                 aiYellow.Update(gameTime);
             }
-         
 
+            aiBlue.Update(gameTime);
+            aiGreen.Update(gameTime);
             #endregion
 
             // Check collision with mapborder
@@ -349,10 +334,10 @@ public class Game1 : Microsoft.Xna.Framework.Game
                 if (Intersect.IntersectPixels(motorek.DrawRectangle, motorek.TextureData,
                                   mapRectangle, mapGradTextureData))
                 {
-                   motorek.Active = false;
+                  // motorek.Active = false;
                 }
                 
-                motorek.Update(gameTime);
+               motorek.Update(gameTime);
             }
             if (allMotorsActive==0)
             {
@@ -364,6 +349,7 @@ public class Game1 : Microsoft.Xna.Framework.Game
             }
 
         }
+        
         #endregion
 
         //game over
@@ -417,6 +403,9 @@ public class Game1 : Microsoft.Xna.Framework.Game
         spriteBatch.DrawString(fontArial10, "GameTime " + DisplayClock(clock_elapsed-clock), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 2.1F), Color.White);
         spriteBatch.DrawString(fontArial10, "Yellow laps: " + lapsMotorYellow.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString()+ "Time: " + DisplayClock(lapsMotorYellow.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.9F), Color.White);
         spriteBatch.DrawString(fontArial10, "Red laps: " + lapsMotorRed.CurrentLap + "/" + GameConstants.LAPS_NUMBER.ToString() + "Time: " + DisplayClock(lapsMotorRed.LapTime), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 1.7F), Color.White);
+        Vector2 dupa = new Vector2(motorRed.Velocity.X, motorRed.Velocity.Y);
+        
+        spriteBatch.DrawString(fontArial10, "Angle: " + motorRed.Angle + "angle vel " + motorRed.AngleVelocity + " vel to ang: " + VectorToAngle(dupa)+ " vel: " +motorRed.Velocity+" atngleto vel : "+AngleToVector(motorRed.Angle), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.6F, graphics.GraphicsDevice.Viewport.Height / 2.4F), Color.White);
 
        
         if(gameState == GameState.GameOver)
@@ -439,10 +428,11 @@ public class Game1 : Microsoft.Xna.Framework.Game
         spriteBatch.Draw(finishRectangle,finishMapRectangle, Color.Chocolate);
 
         //draw checkpoint
-        spriteBatch.Draw(finishRectangle, checkPointARectangle, Color.Chocolate);
-        spriteBatch.Draw(finishRectangle, checkPointBRectangle, Color.Chocolate);
-        spriteBatch.Draw(finishRectangle, checkPointCRectangle, Color.Chocolate);
-        spriteBatch.Draw(finishRectangle, checkPointDRectangle, Color.Chocolate);
+        foreach(Rectangle rectangle in checkAiPointsList)
+        {
+            spriteBatch.Draw(finishRectangle, rectangle, Color.Chocolate);
+        }
+         
     }
 
     private string DisplayClock(int clock)
@@ -454,7 +444,43 @@ public class Game1 : Microsoft.Xna.Framework.Game
         
         return time;
     }
+    private void CheckPoints()
+    {
+        checkPointsList = new List<Rectangle>();
+
+        checkPointsList.Add(new Rectangle(575, 332, 1, 135));
+        checkPointsList.Add(new Rectangle(655, 252, 130, 1));
+        checkPointsList.Add(new Rectangle(575, 35, 1, 135));
+        checkPointsList.Add(new Rectangle(205, 35, 1, 135));
+        checkPointsList.Add(new Rectangle(13, 252, 134, 1));
+        checkPointsList.Add(new Rectangle(200, 332, 1, 135));
+
+        checkAiPointsList = new List<Rectangle>();
+       // checkAiPointsList.Add(new Rectangle(575, 332, 1, 135));
+        checkAiPointsList.Add(new Rectangle(640, 332, 60, 60));
+        checkAiPointsList.Add(new Rectangle(655, 252, 130, 1));
+      //  checkAiPointsList.Add(new Rectangle(640, 132, 60,60));
+        checkAiPointsList.Add(new Rectangle(575, 35, 1, 135));
+      //  checkAiPointsList.Add(new Rectangle(340, 92, 60, 60));
+      //  checkAiPointsList.Add(new Rectangle(205, 35, 1, 135));
+        checkAiPointsList.Add(new Rectangle(120, 112, 80, 80));
+        checkAiPointsList.Add(new Rectangle(13, 252, 134, 1));
+       // checkAiPointsList.Add(new Rectangle(130, 332, 50, 50));
+      //  checkAiPointsList.Add(new Rectangle(200, 332, 1, 135));
+        checkAiPointsList.Add(new Rectangle(340, 332, 30, 130));
+    }
 
 
-   
+    private Vector2 AngleToVector(float angle)
+    {
+        Vector2 vectorek = new Vector2((float)Math.Cos(angle), -(float)Math.Sin(angle));
+
+        return vectorek;
+    }
+
+
+    float VectorToAngle(Vector2 vector)
+    {
+        return (float)Math.Atan2(-vector.X, -vector.Y)+(float)Math.PI/2;
+    }
 }}
