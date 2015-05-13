@@ -26,8 +26,8 @@ namespace Zuzel
             this.checkPointListAi = checkPointListAi;
             this.motor = motor;
             this.currentLap = 1;
-            this.motor.Thrust = true;
-            this.motor.Turning = true;
+            this.motor.Thrust = false;
+            this.motor.Turning = false;
             this.currentCheckpoint = 0;
 
             
@@ -53,15 +53,12 @@ namespace Zuzel
         {
             Target(this.checkPointListAi[this.currentCheckpoint],gameTime);
 
-            //for (int idx = 0; idx < this.currentLapCheckpoints.Count(); idx++)
-         //   {
             if (this.motor.CollisionRectangle.Intersects(checkPointListAi[this.currentCheckpoint]) && this.currentLapCheckpoints[this.currentCheckpoint] == 0)
                 {
                     this.currentLapCheckpoints[this.currentCheckpoint] = 1;
                     this.currentCheckpoint++;
                    
                 }
-         //   }
             if (CheckCheckPoints())
             {
                 this.currentLapCheckpoints.Clear();
@@ -76,57 +73,27 @@ namespace Zuzel
         private void Target(Rectangle targetRectangle, GameTime gameTime)
         {
 
-            Vector2 difference = new Vector2(targetRectangle.Center.X - this.motor.DrawRectangle.Center.X + random.Next(-30, 30), targetRectangle.Center.Y - this.motor.DrawRectangle.Center.Y + random.Next(-30, 30));
+            Vector2 difference = new Vector2(targetRectangle.Center.X - this.motor.DrawRectangle.Center.X + random.Next(-30, 30), targetRectangle.Center.Y - this.motor.DrawRectangle.Center.Y + random.Next(-50, 50));
 
             difference.Normalize();
 
-            Console.WriteLine("target" + currentCheckpoint);
-            ////Console.WriteLine("target"+targetRectangle);
-            //Console.WriteLine("motor ang" + this.motor.Angle);
-            //Console.WriteLine("vevv to angk" + VectorToAngle(difference));
-            //Console.WriteLine("diff" + (difference));
-            if (gameTime.TotalGameTime.Milliseconds % 20 == 0)
+            if (gameTime.TotalGameTime.Milliseconds % 10 == 0)
             {
-                double temp_angle =this.motor.Angle;
-                if(temp_angle >= (Math.PI*1.5D))
+                float accSpeedIndex=1;
+                if(difference.Y < 0.2F&&difference.Y>-0.2F)
                 {
-                   
-                    temp_angle= temp_angle - Math.PI;
+                    accSpeedIndex = 1.5F;
+                }
+                else
+                {
+                    accSpeedIndex = 1;
                 }
                 
-                else if (temp_angle <= -(Math.PI /2D))
-                {
-
-                    temp_angle = temp_angle + 2*Math.PI;
-                }
-                
-                
-                if (temp_angle >= VectorToAngle(difference))
-                {
-                    this.motor.AngleVelocity = -0.15F;
-                }
-
-                else 
-                {
-                    this.motor.AngleVelocity = 0.15F;
-                }
-
-                //this.motor.Velocity += difference;
-                //this.motor.AngleVelocity = 0.04F;
-
-                // this.motor.Angle = VectorToAngle(difference);
+                this.motor.Velocity += (difference*accSpeedIndex);
+              
             }
-            if (gameTime.TotalGameTime.Milliseconds % 4 == 0)
-            {
-                this.motor.Thrust = true;
-            }
-            else
-            {
-                this.motor.Thrust = false;
-            }
-
+           if(this.motor.Active) this.motor.Angle = VectorToAngle(this.motor.Velocity);
         }
-
 
 
         private Vector2 AngleToVector(float angle)
@@ -138,12 +105,22 @@ namespace Zuzel
 
         float VectorToAngle(Vector2 vector)
         {
-            return (float)Math.Atan2(-vector.X, -vector.Y) + (float)Math.PI / 2;
-        }
+            double anglee = Math.Atan2(-vector.X, -vector.Y) + Math.PI / 2D;
+            double angle;
 
-        //float VectorToAngle(Vector2 vector)
-        //{
-        //    return (float)Math.Atan2(vector.X, -vector.Y);
-        //}
+            if (anglee <= 0)
+            {
+                angle = anglee + 2 * Math.PI;
+            }
+
+            else
+            {
+                angle = anglee;
+
+            }
+            return (float)angle;
+        }
+         
+    
     }
 }

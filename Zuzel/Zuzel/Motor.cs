@@ -75,6 +75,17 @@ namespace Zuzel
          
 
         }
+
+        public void Draw(SpriteBatch spriteBatch, int x, int y)
+        {
+            
+      
+            spriteBatch.Draw(sprite, new Vector2(x,y),Color.White);
+         
+
+
+        }
+
           private Vector2 AngleToVector(float angle)
 {
       Vector2 vectorek = new Vector2 ((float)Math.Cos(angle),-(float)Math.Sin(angle));

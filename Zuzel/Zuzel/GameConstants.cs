@@ -32,9 +32,7 @@ namespace Zuzel
         public const float MUSIC_VOL = 0.3F;
         public const float SFX_VOL = 0.4F;
 
-        public static Vector2 START_POS_RED = new Vector2(430, 360);
-        public static Vector2 START_POS_GREEN = new Vector2(100, 100);
-        public static Vector2 START_POS_BLUE = new Vector2(100, 100);
-        public static Vector2 START_POS_YELLOW = new Vector2(100, 100);
+        public static Vector2 START_POS = new Vector2(430, 360);
+
     }
 }

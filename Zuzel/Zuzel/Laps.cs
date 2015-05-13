@@ -34,7 +34,7 @@ namespace Zuzel
         public string MotorName
         {
             get { return motor.MotorName; }
-            
+
         }
 
         public Laps(Motor motor, List<Rectangle> checkPointList, Rectangle finishMapRectangle, int lapsNumber, int clock)
@@ -45,7 +45,7 @@ namespace Zuzel
             this.lapCount = lapsNumber;
             this.currentLap = 1;
             currentLapCheckpoints = new List<int>();
-            foreach(Rectangle rectangle in checkPointList);
+            foreach (Rectangle rectangle in checkPointList) ;
             {
                 currentLapCheckpoints.Add(0);
             }
@@ -53,11 +53,11 @@ namespace Zuzel
             this.clock = clock;
             finishedRace = false;
         }
-        
+
         public bool CheckCheckPoints()
         {
-                        
-            if(currentLapCheckpoints.Min()>0)
+
+            if (currentLapCheckpoints.Min() > 0)
             {
                 return true;
             }
@@ -67,34 +67,36 @@ namespace Zuzel
 
         public void Update(GameTime gameTime, int clock)
         {
-            if(motor.Active)
+            if (motor.Active)
             {
-              this.clock = clock;
+                this.clock = clock;
             }
-            
+
             for (int idx = 0; idx < currentLapCheckpoints.Count(); idx++)
             {
-                 if(motor.CollisionRectangle.Intersects(checkPointList[idx]))
-                 {
-                     currentLapCheckpoints[idx] = 1;
-                 }
-            }
-            if (motor.CollisionRectangle.Intersects(finishMapRectangle) && (motor.Velocity.X > 0)&&CheckCheckPoints())
-            {
-                
-                currentLapCheckpoints.Clear();
-                foreach(Rectangle rectangle in checkPointList);
-                   {
-                currentLapCheckpoints.Add(0);
-                   }
-
-                if(currentLap>=lapCount)
+                if (motor.CollisionRectangle.Intersects(checkPointList[idx]))
                 {
+                    currentLapCheckpoints[idx] = 1;
+                }
+            }
+            if (motor.CollisionRectangle.Intersects(finishMapRectangle) && (motor.Velocity.X > 0) && CheckCheckPoints())
+            {
+
+                currentLapCheckpoints.Clear();
+                foreach (Rectangle rectangle in checkPointList) 
+                {
+                    currentLapCheckpoints.Add(0);
+                }
+
+                this.currentLap++;
+
+                if (currentLap >= lapCount)
+                {
+                    this.currentLap = lapCount;
                     motor.Active = false;
                     this.finishedRace = true;
-                    this.lapTime = clock ;
+                    this.lapTime = clock;
                 }
-                this.currentLap++;
             }
         }
 
