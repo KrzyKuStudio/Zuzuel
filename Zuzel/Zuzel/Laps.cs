@@ -45,7 +45,7 @@ namespace Zuzel
             this.lapCount = lapsNumber;
             this.currentLap = 1;
             currentLapCheckpoints = new List<int>();
-            foreach (Rectangle rectangle in checkPointList) ;
+            foreach (Rectangle rectangle in checkPointList) 
             {
                 currentLapCheckpoints.Add(0);
             }
@@ -90,7 +90,7 @@ namespace Zuzel
 
                 this.currentLap++;
 
-                if (currentLap >= lapCount)
+                if (currentLap > lapCount)
                 {
                     this.currentLap = lapCount;
                     motor.Active = false;

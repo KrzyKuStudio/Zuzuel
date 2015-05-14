@@ -18,6 +18,8 @@ namespace Zuzel
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        #region Variables
+
         GraphicsDeviceManager graphics;
 
         // The color data for the images; used for per pixel collision
@@ -29,6 +31,7 @@ namespace Zuzel
         Color[] mapGradTextureData;
         Texture2D finishRectangle;
         Rectangle finishMapRectangle;
+        SoundEffect motorSound;
 
         List<Rectangle> checkPointsList;
         List<Rectangle> checkAiPointsList;
@@ -54,7 +57,7 @@ namespace Zuzel
         List<AIMotorMovement> aiMovement = new List<AIMotorMovement>();
 
         StringBuilder winner;
-        Motor winnerMotor;
+      
 
         //clock
         int clock;
@@ -74,6 +77,8 @@ namespace Zuzel
             StartGame,
             Intro,
             DisplayResults,
+            DisplayTournament,
+            DisplayTournamentFinal,
             Counting
         }
 
@@ -84,19 +89,32 @@ namespace Zuzel
             Player2
         }
 
+        public enum WhatGame
+        {
+            singleGame,
+            Tournament
+        }
+
+        Tournament tournament;
         Players player2;
         GameState gameState;
+        WhatGame whatGame;
 
         // The images will be drawn with this SpriteBatch
         SpriteBatch spriteBatch;
 
         Random random = new Random();
-
+        bool soundPlayingGO; 
+        bool soundPlaying1; 
+        bool soundPlaying2;
+        bool soundPlaying3; 
+          
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
         // Percentage of the screen on every side is the safe area
         const float SafeAreaPortion = 0.01f;
 
+#endregion
 
         public Game1()
         {
@@ -109,7 +127,6 @@ namespace Zuzel
             graphics.PreferredBackBufferWidth = GameConstants.WINDOW_WIDTH;
             graphics.PreferredBackBufferHeight = GameConstants.WINDOW_HEIGHT;
         }
-
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to
@@ -132,7 +149,6 @@ namespace Zuzel
 
         }
 
-
         /// <summary>
         /// Load your graphics content.
         /// </summary>
@@ -141,7 +157,7 @@ namespace Zuzel
             
             // Create a sprite batch to draw those textures
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-
+            motorSound = Content.Load<SoundEffect>("audio\\motorRunning");
             try
             {
                 mapTexture = Content.Load<Texture2D>("image\\map");
@@ -174,7 +190,6 @@ namespace Zuzel
             //fps counter
             fpsMonitor = new FpsMonitor();
         }
-
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -210,11 +225,12 @@ namespace Zuzel
             if (gameState == GameState.Intro)
             {
                 winner.Clear();
-                winner.Append("Welcome to ZUZEL\n");
-                winner.Append("\n");
-                winner.Append("Press:                                 Steering:\n");
-                winner.Append("B - one player game             ONE: Left, Up, Right\n");
-                winner.Append("N - two player game             TWO: A, S, D\n");
+                winner.Append("Welcome to ZUZELO             Steering:\n");
+                winner.Append("                                            ONE: Left, Up, Right\n");
+                winner.Append("                                            TWO: A, S, D\n");
+                winner.Append("Press:                                  \n");
+                winner.Append("B - one player single game      G - one player Tournament\n");
+                winner.Append("N - two player single game      H - two player Tournament\n");
                 winner.Append("ESC - exit");
 
                 //new game
@@ -222,12 +238,31 @@ namespace Zuzel
                 {
                     gameState = GameState.NewGame;
                     player2 = Players.AI;
+                    whatGame = WhatGame.singleGame;
                 }
                 //new game
                 if (keyboard.IsKeyDown(Keys.N))
                 {
                     gameState = GameState.NewGame;
                     player2 = Players.Player2;
+                    whatGame = WhatGame.singleGame;
+                }
+
+                //new game
+                if (keyboard.IsKeyDown(Keys.G))
+                {
+                    gameState = GameState.NewGame;
+                    player2 = Players.AI;
+                    whatGame = WhatGame.Tournament;
+                    tournament = new Tournament(GameConstants.ROUNDSTOURNAMENT);
+                }
+                //new game
+                if (keyboard.IsKeyDown(Keys.H))
+                {
+                    gameState = GameState.NewGame;
+                    player2 = Players.Player2;
+                    whatGame = WhatGame.Tournament;
+                    tournament = new Tournament(GameConstants.ROUNDSTOURNAMENT);
                 }
 
                 // Allows the game to exit
@@ -248,7 +283,11 @@ namespace Zuzel
                 laps.Clear();
                 int index, pos;
                 lapsWinner.Clear();
-
+                //sounds counting flag
+                soundPlayingGO = false;
+                soundPlaying1 = false;
+                soundPlaying2 = false;
+                soundPlaying3 = false;
                 //starting positions
                 List<int> positions = new List<int>();
                 positions.Add(0);
@@ -260,14 +299,26 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorRed = new Motor("Red    ", Content, "image\\motorred", (int)GameConstants.START_POS.X,
-                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), null);
+                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound);
                 motors.Add(motorRed);
 
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
-                motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
+                if(player2 == Players.Player2)
+                {
+                    motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
+                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound);
+                
+                }
+                else
+                {
+                    motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
                              (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), null);
+                
+                }
+                
+                
                 motors.Add(motorYellow);
 
                 pos = random.Next(positions.Count);
@@ -289,6 +340,19 @@ namespace Zuzel
                 aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList);
                 aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList);
                
+                if(whatGame == WhatGame.Tournament)
+                {
+                 if(tournament.State == Tournament.TournamentState.NewGame)
+                 {
+                     foreach(Motor motor in motors)
+                     {
+                         tournament.AddPlayer(motor.MotorName);
+                      }
+                     tournament.State = Tournament.TournamentState.Playing;
+                 }
+
+                }
+
                 clock = (int)gameTime.TotalGameTime.TotalSeconds;
                 gameState = GameState.Counting;
 
@@ -299,10 +363,22 @@ namespace Zuzel
             #region Counting
             if (gameState == GameState.Counting)
             {
+                SoundEffect counting;
+                 counting = Content.Load<SoundEffect>("audio\\tick");
+                SoundEffectInstance instance;
+                instance = counting.CreateInstance();
+                instance.IsLooped = false;
                 winner.Clear();
 
                 if ((int)gameTime.TotalGameTime.TotalSeconds - clock == 2)
                 {
+                  
+                    if(!soundPlaying3)
+                    { 
+                        instance.Play();
+                         soundPlaying3 = true;
+                    }
+                    
                     winner.Append("                                 *********\n");
                     winner.Append("                                         **\n");
                     winner.Append("                                         **\n");
@@ -313,6 +389,12 @@ namespace Zuzel
                 }
                 if ((int)gameTime.TotalGameTime.TotalSeconds - clock == 3)
                 {
+
+                    if (!soundPlaying2)
+                    {
+                        instance.Play();
+                        soundPlaying2 = true;
+                    }
                     winner.Append("                                 *********\n");
                     winner.Append("                                        **\n");
                     winner.Append("                                       **\n");
@@ -323,6 +405,12 @@ namespace Zuzel
                 }
                 if ((int)gameTime.TotalGameTime.TotalSeconds - clock == 4)
                 {
+
+                    if (!soundPlaying1)
+                    {
+                        instance.Play();
+                        soundPlaying1 = true;
+                    }
                     winner.Append("                                      *****\n");
                     winner.Append("                                     *   **\n");
                     winner.Append("                                         **\n");
@@ -333,8 +421,16 @@ namespace Zuzel
                 }
                 if ((int)gameTime.TotalGameTime.TotalSeconds - clock >=5)
                 {
+                    if (!soundPlayingGO)
+                    {
+                        counting = Content.Load<SoundEffect>("audio\\tack"); 
+                        counting.Play();
+                        soundPlayingGO = true;
+                    }
                     gameState = GameState.StartGame;
                 }
+
+
               
             }
             #endregion
@@ -361,6 +457,7 @@ namespace Zuzel
             #region Game Playing
             if (gameState == GameState.Playing)
             {
+                      
                 foreach (Motor motorek in motors)
                 {
                     motorek.AngleVelocity = 0.0F;
@@ -382,6 +479,7 @@ namespace Zuzel
                     motorRed.Turning = true;
 
                 }
+
                 if (keyboard.IsKeyDown(Keys.Up))
                 {
                     motorRed.Thrust = true;
@@ -492,7 +590,6 @@ namespace Zuzel
             {
                 List<int> temporaryList = new List<int>();
 
-
                 var winnerMotor =
                     from motor in laps
                     where motor.LapTime > 0
@@ -509,7 +606,20 @@ namespace Zuzel
                 if (lapsWinner.Count > 0)
                 {
 
-                    winner.Append("Winner: " + lapsWinner[0].MotorName + "                    SPACE for main screen\n\n");
+                    if (whatGame == WhatGame.singleGame)
+                    {
+                        winner.Append("Winner: " + lapsWinner[0].MotorName + "                    SPACE for main screen\n\n");
+                    }
+                    else
+                    {
+                        winner.Append("Winner: " + lapsWinner[0].MotorName + "                    SPACE for tournament screen\n\n");
+                        int score = 3;
+                        foreach (Laps lap in lapsWinner)
+                        {
+                            tournament.AddTimes(lap.MotorName, score,lap.LapTime);
+                            score--;
+                        }
+                    }
                     int position = 1;
                     foreach (Laps lap in lapsWinner)
                     {
@@ -520,8 +630,16 @@ namespace Zuzel
                 else
                 {
                     winner.Clear();
-                    winner.Append("Nobody wins           SPACE for main screen\n\n");
+                    if(whatGame == WhatGame.singleGame)
+                    {
+                        winner.Append("Nobody wins           SPACE for main screen\n\n");
 
+                    }
+                    else
+                    {
+                        winner.Append("Nobody wins           SPACE for tournament screen\n\n");
+                    }
+                    
 
                 }
                 gameState = GameState.DisplayResults;
@@ -532,14 +650,64 @@ namespace Zuzel
             if (gameState == GameState.DisplayResults)
             {
                 //intro screen
-                if (keyboard.IsKeyDown(Keys.Space))
+                if (keyboard.IsKeyDown(Keys.Space)&&whatGame==WhatGame.singleGame)
                 {
                     gameState = GameState.Intro;
+                }
+                //tournament results
+                if (keyboard.IsKeyDown(Keys.Space) && whatGame == WhatGame.Tournament)
+                {
+                    gameState = GameState.DisplayTournament;
+                    clock = (int)gameTime.TotalGameTime.TotalSeconds;
                 }
 
             }
             #endregion
 
+            #region Display Tournament
+            if (gameState == GameState.DisplayTournament)
+            {
+                winner.Clear();
+                if (tournament.State == Tournament.TournamentState.Playing)
+                {
+                    winner.Append("Tournament scores          SPACE for next round\n");
+                    winner.Append(tournament.ToString());
+                    //new game with 1second delay hiting key
+                    if (keyboard.IsKeyDown(Keys.Space) && ((int)gameTime.TotalGameTime.TotalSeconds - clock) >= 1)
+                    {
+                        gameState = GameState.NewGame;
+                        tournament.AddRound();
+                    }
+                }
+
+                else if (tournament.State == Tournament.TournamentState.Ended)
+                {
+                    winner.Clear();
+                    winner.Append("FINAL SCORES                 SPACE for end Tournament\n");
+                    winner.Append(tournament.ToString());
+                    //new game with 1second delay hiting key
+                    if (keyboard.IsKeyDown(Keys.Space) && ((int)gameTime.TotalGameTime.TotalSeconds - clock) >= 2)
+                    {
+                        gameState = GameState.Intro;
+                        clock = (int)gameTime.TotalGameTime.TotalSeconds;
+                    }
+                }
+
+            }
+            #endregion
+
+            #region Display Tournament Winner
+            if (gameState == GameState.DisplayTournamentFinal)
+            {
+                //tournament results
+                if (keyboard.IsKeyDown(Keys.Space) && ((int)gameTime.TotalGameTime.TotalSeconds - clock) >= 1)
+                {
+                    gameState = GameState.Intro;
+                    
+                }
+
+            }
+            #endregion
             fpsMonitor.Update();
             base.Update(gameTime);
         }

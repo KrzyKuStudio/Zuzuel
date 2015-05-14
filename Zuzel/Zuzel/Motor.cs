@@ -20,6 +20,8 @@ namespace Zuzel
         float accSpeed;
         bool turning;
         string motorName;
+        SoundEffectInstance soundMotorInstance;
+     
 
           public Motor(string name,ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
             SoundEffect shootSound) : base(contentManager, spriteName, x, y, velocity, shootSound)
@@ -29,7 +31,14 @@ namespace Zuzel
               this.friction = 0.04F;
               this.accSpeed = 0.4F;
               this.motorName = name;
-            }
+              if (shootSound != null)
+              {
+                  soundMotorInstance = this.shootSound.CreateInstance();
+                  soundMotorInstance.IsLooped = true;
+                  soundMotorInstance.Volume = GameConstants.SFX_VOL - 0.2F;
+                  this.soundMotorInstance.Play();
+              }
+              }
         
           public bool Thrust
           {
@@ -117,6 +126,7 @@ namespace Zuzel
                   {
                       this.velocity.X += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.X;
                       this.velocity.Y += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.Y;
+                 
                       
                   }
                   if(turning)
@@ -127,7 +137,30 @@ namespace Zuzel
                   {
                       this.accSpeed = GameConstants.MOTOR_ACC_SPEED;
                   }
+                  if(this.shootSound!=null)
+                  {
+                      if (thrust)
+                      {
+                          this.soundMotorInstance.Pitch = 0.5f;
+                          soundMotorInstance.Volume = GameConstants.SFX_VOL;
+                      }
+                      else
+                      {
+                          this.soundMotorInstance.Pitch = 0;
+                          soundMotorInstance.Volume = GameConstants.SFX_VOL - 0.2F;
+                       
+                      }
                  
+                  }
+
+                  
+              }
+              else if (this.shootSound != null)
+              {
+                 
+                      this.soundMotorInstance.Stop();
+                
+
               }
             
       

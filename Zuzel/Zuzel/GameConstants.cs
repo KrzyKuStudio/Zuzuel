@@ -17,6 +17,7 @@ namespace Zuzel
         public const float MOTOR_ACC_SPEED = 0.4F;
 
         public const int LAPS_NUMBER = 4;
+        public const int ROUNDSTOURNAMENT = 10;
 
         // display support
         public const bool VISIBLEMOUSE = true;

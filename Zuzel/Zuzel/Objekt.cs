@@ -162,7 +162,9 @@ namespace Zuzel
             {
                 drawRectangle.X += (int)velocity.X;
                 drawRectangle.Y += (int)velocity.Y;
+            
             }
+
         }
 
         /// <summary>
