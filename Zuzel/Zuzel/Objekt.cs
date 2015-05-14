@@ -29,7 +29,7 @@ namespace Zuzel
         //none
 
         // sound effect
-        protected SoundEffect shootSound;
+        protected SoundEffect Sound;
 
         #endregion
 
@@ -43,12 +43,12 @@ namespace Zuzel
         /// <param name="spriteName">the sprite name</param>
         /// <param name="x">the x location of the center of the burger</param>
         /// <param name="y">the y location of the center of the burger</param>
-        /// <param name="shootSound">the sound the burger plays when shooting</param>
+        /// <param name="Sound">the sound the burger plays when shooting</param>
         public Objekt(ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
-            SoundEffect shootSound)
+            SoundEffect Sound)
         {
             LoadContent(contentManager, spriteName, x, y);
-            this.shootSound = shootSound;
+            this.Sound = Sound;
             this.active = true;
             this.velocity = velocity;
            

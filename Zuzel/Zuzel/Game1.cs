@@ -79,7 +79,9 @@ namespace Zuzel
             DisplayResults,
             DisplayTournament,
             DisplayTournamentFinal,
-            Counting
+            Counting,
+            Options,
+            Exit
         }
 
         public enum Players
@@ -107,8 +109,11 @@ namespace Zuzel
         bool soundPlayingGO; 
         bool soundPlaying1; 
         bool soundPlaying2;
-        bool soundPlaying3; 
-          
+        bool soundPlaying3;
+        bool soundON = true;
+
+        bool keyUup, keyYup;
+
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
         // Percentage of the screen on every side is the safe area
@@ -157,7 +162,7 @@ namespace Zuzel
             
             // Create a sprite batch to draw those textures
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-            motorSound = Content.Load<SoundEffect>("audio\\motorRunning");
+            
             try
             {
                 mapTexture = Content.Load<Texture2D>("image\\map");
@@ -189,6 +194,8 @@ namespace Zuzel
             winner = new StringBuilder();
             //fps counter
             fpsMonitor = new FpsMonitor();
+            keyUup = false;
+            keyYup = false;
         }
 
         /// <summary>
@@ -201,15 +208,39 @@ namespace Zuzel
             // Get input
             KeyboardState keyboard = Keyboard.GetState();
             GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
+            #region Allways keys
 
             // back to menu
-            if (
-                keyboard.IsKeyDown(Keys.M))
+            if ( keyboard.IsKeyDown(Keys.M))
             {
                 gameState = GameState.Intro;
+                ////turn off all sounds
+                foreach(Motor motor in motors)
+                {
+                    motor.Active = false;
+                    motor.Update(gameTime);
+                }
             }
+            //sounds on off
+            if (keyboard.IsKeyDown(Keys.U)&&keyUup)
+            {
+                if(soundON)
+                {
+                   soundON = false;
+                }
+                else
+                {
+                    soundON = true;
+                }
+                keyUup = false;
+            }
+             if (keyboard.IsKeyUp(Keys.U))
+            {
+                keyUup = true;
+            }
+
             //show fps
-            if (keyboard.IsKeyDown(Keys.Y))
+            if (keyboard.IsKeyDown(Keys.Y)&&keyYup)
             {
                 if (showFps)
                 {
@@ -218,9 +249,18 @@ namespace Zuzel
                 else
                 {
                     showFps = true;
+                }
+                keyYup = false;
+
             }
-            }
-        
+
+                if (keyboard.IsKeyUp(Keys.Y))
+                {
+                    keyYup = true;
+                }
+              
+#endregion
+                    
             #region Intro
             if (gameState == GameState.Intro)
             {
@@ -231,7 +271,7 @@ namespace Zuzel
                 winner.Append("Press:                                  \n");
                 winner.Append("B - one player single game      G - one player Tournament\n");
                 winner.Append("N - two player single game      H - two player Tournament\n");
-                winner.Append("ESC - exit");
+                winner.Append("O - options");
 
                 //new game
                 if (keyboard.IsKeyDown(Keys.B))
@@ -239,6 +279,12 @@ namespace Zuzel
                     gameState = GameState.NewGame;
                     player2 = Players.AI;
                     whatGame = WhatGame.singleGame;
+                }
+                //options
+                if (keyboard.IsKeyDown(Keys.O))
+                {
+                    gameState = GameState.Options;
+                    
                 }
                 //new game
                 if (keyboard.IsKeyDown(Keys.N))
@@ -275,6 +321,35 @@ namespace Zuzel
             }
             #endregion
 
+            #region Options
+            if(gameState == GameState.Options)
+            {
+                // Allows the game to exit
+                if (gamePad.Buttons.Back == ButtonState.Pressed ||
+                    keyboard.IsKeyDown(Keys.Escape))
+                {
+                    this.Exit();
+                }
+
+                winner.Clear();
+                winner.Append("Options:                                          Made by:\n");
+                winner.Append("                                             www.krzykustudio.pl\n");
+
+                if (soundON)
+                    winner.Append("U - Sound ON\n");
+                else
+                    winner.Append("U - Sound OFF\n");
+
+                if (showFps)
+                    winner.Append("Y - Show fps ON                           Sounds from:\n");
+                else
+                    winner.Append("Y - Show fps OFF                          Sounds from:\n");
+
+                winner.Append("M - Menu                                   www.freefx.co.uk\n");
+                winner.Append("ESC - Exit                                          2015\n"); 
+            }
+            #endregion
+
             #region New Game
             if (gameState == GameState.NewGame)
             {
@@ -298,41 +373,35 @@ namespace Zuzel
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
+                motorSound = Content.Load<SoundEffect>("audio\\motorRunning1");
                 motorRed = new Motor("Red    ", Content, "image\\motorred", (int)GameConstants.START_POS.X,
-                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound);
+                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL);
                 motors.Add(motorRed);
 
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
-                if(player2 == Players.Player2)
-                {
+                motorSound = Content.Load<SoundEffect>("audio\\motorRunning2");
                     motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
-                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound);
-                
-                }
-                else
-                {
-                    motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
-                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), null);
-                
-                }
-                
+                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound ,GameConstants.SFX_VOL);
+                              
                 
                 motors.Add(motorYellow);
 
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
+                motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorBlue = new Motor("Blue   ", Content, "image\\motorblue", (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), null);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL);
                 motors.Add(motorBlue);
 
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
+                motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorGreen = new Motor("Green ", Content, "image\\motorgreen", (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), null);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound,  GameConstants.SFX_VOL);
                 motors.Add(motorGreen);
 
                 //AI layers
@@ -462,6 +531,7 @@ namespace Zuzel
                 {
                     motorek.AngleVelocity = 0.0F;
                     motorek.Turning = false;
+                 
                 }
                 clock_elapsed = (int)gameTime.TotalGameTime.TotalMilliseconds;
                 // Move the player 
@@ -708,6 +778,11 @@ namespace Zuzel
 
             }
             #endregion
+            
+            foreach (Motor motor in motors)
+            {
+                motor.SoundOnOff(soundON,GameConstants.SFX_VOL);
+            }
             fpsMonitor.Update();
             base.Update(gameTime);
         }
@@ -781,17 +856,17 @@ namespace Zuzel
             checkPointsList.Add(new Rectangle(200, 332, 1, 135));
 
             checkAiPointsList = new List<Rectangle>();
-            checkAiPointsList.Add(new Rectangle(575, 332, 1, 135));
-            checkAiPointsList.Add(new Rectangle(640, 332, 60, 60));
+            checkAiPointsList.Add(new Rectangle(575, 332, 1, 115));
+            checkAiPointsList.Add(new Rectangle(630, 322, 60, 60));
             checkAiPointsList.Add(new Rectangle(655, 252, 130, 1));
             checkAiPointsList.Add(new Rectangle(640, 132, 60, 60));
             checkAiPointsList.Add(new Rectangle(575, 35, 1, 135));
             checkAiPointsList.Add(new Rectangle(340, 52, 60, 80));
-            checkAiPointsList.Add(new Rectangle(205, 35, 1, 135));
-            checkAiPointsList.Add(new Rectangle(120, 112, 80, 80));
+            checkAiPointsList.Add(new Rectangle(205, 55, 1, 105));
+            checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
             checkAiPointsList.Add(new Rectangle(13, 252, 134, 1));
             //checkAiPointsList.Add(new Rectangle(130, 332, 50, 50));
-            checkAiPointsList.Add(new Rectangle(200, 332, 1, 135));
+            checkAiPointsList.Add(new Rectangle(200, 342, 1, 135));
             //checkAiPointsList.Add(new Rectangle(340, 332, 30, 130));
         }
 

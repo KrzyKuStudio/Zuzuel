@@ -80,18 +80,33 @@
   <ItemGroup>
     <Compile Include="audio\tack.wav">
       <Name>tack</Name>
-	        <Importer>WavImporter</Importer>
+      <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
     </Compile>
     <Compile Include="audio\tick.wav">
       <Name>tick</Name>
-	        <Importer>WavImporter</Importer>
+      <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="audio\motorRunning.wav">
-      <Name>motorRunning</Name>
+    <Compile Include="audio\motorRunning1.wav">
+      <Name>motorRunning1</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="audio\motorRunning2.wav">
+      <Name>motorRunning2</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="audio\motorRunning3.wav">
+      <Name>motorRunning3</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
+    </Compile>
+    <Compile Include="audio\motorRunning4.wav">
+      <Name>motorRunning4</Name>
       <Importer>WavImporter</Importer>
       <Processor>SoundEffectProcessor</Processor>
     </Compile>

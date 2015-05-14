@@ -21,22 +21,26 @@ namespace Zuzel
         bool turning;
         string motorName;
         SoundEffectInstance soundMotorInstance;
+        bool soundIsPlaying;
      
 
           public Motor(string name,ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
-            SoundEffect shootSound) : base(contentManager, spriteName, x, y, velocity, shootSound)
+            SoundEffect Sound, float soundVolume) : base(contentManager, spriteName, x, y, velocity, Sound)
             {
               this.angle = 0;  
               this.angleVelocity = 0;
               this.friction = 0.04F;
               this.accSpeed = 0.4F;
               this.motorName = name;
-              if (shootSound != null)
+
+
+              if (Sound != null)
               {
-                  soundMotorInstance = this.shootSound.CreateInstance();
+                  soundMotorInstance = this.Sound.CreateInstance();
                   soundMotorInstance.IsLooped = true;
-                  soundMotorInstance.Volume = GameConstants.SFX_VOL - 0.2F;
+                  soundMotorInstance.Volume = soundVolume - 0.2F;
                   this.soundMotorInstance.Play();
+                  this.soundIsPlaying = true;
               }
               }
         
@@ -66,6 +70,29 @@ namespace Zuzel
             get { return turning; }
             set { turning = value; }
            
+        }
+        public void SoundOnOff(bool soundON, float soundVolume)
+        {
+            if(!soundON)
+            {
+                this.soundMotorInstance.Volume = 0F;
+                if(this.soundIsPlaying)
+                {
+                    this.soundMotorInstance.Stop();
+                    this.soundIsPlaying = false;
+                }
+                
+            }
+            else
+            {
+                this.soundMotorInstance.Volume = soundVolume;
+                if(!this.soundIsPlaying)
+                {
+                    this.soundMotorInstance.Play();
+                    this.soundIsPlaying = true;
+                }
+                
+            }
         }
           /// <summary>
           /// Updates the objektlocation location
@@ -137,7 +164,7 @@ namespace Zuzel
                   {
                       this.accSpeed = GameConstants.MOTOR_ACC_SPEED;
                   }
-                  if(this.shootSound!=null)
+                  if(this.Sound!=null)
                   {
                       if (thrust)
                       {
@@ -155,7 +182,7 @@ namespace Zuzel
 
                   
               }
-              else if (this.shootSound != null)
+              else if (this.Sound != null)
               {
                  
                       this.soundMotorInstance.Stop();

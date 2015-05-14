@@ -19,6 +19,8 @@ namespace Zuzel
         List<int> currentLapCheckpoints;
         int currentCheckpoint;
         Random random = new Random();
+        float speedRandom;
+        int handlingDivider;
         
 
         public AIMotorMovement(Motor motor, List<Rectangle> checkPointListAi)
@@ -29,8 +31,9 @@ namespace Zuzel
             this.motor.Thrust = false;
             this.motor.Turning = false;
             this.currentCheckpoint = 0;
-
-            
+            this.speedRandom = 0.95F+0.01F*(float)random.Next(1,9);
+            this.handlingDivider = 10;
+           
             this.currentLapCheckpoints = new List<int>();
             foreach(Rectangle rectangle in this.checkPointListAi)
             {
@@ -77,21 +80,23 @@ namespace Zuzel
 
             difference.Normalize();
 
-            if (gameTime.TotalGameTime.Milliseconds % 10 == 0)
+            if (gameTime.TotalGameTime.Milliseconds % this.handlingDivider == 0)
             {
                 float accSpeedIndex=1;
                 if(difference.Y < 0.2F&&difference.Y>-0.2F)
                 {
                     accSpeedIndex = 1.5F;
-                }
+                                }
                 else
                 {
                     accSpeedIndex = 1;
                 }
                 
-                this.motor.Velocity += (difference*accSpeedIndex);
+                this.motor.Velocity += (difference*accSpeedIndex*speedRandom);
+                
               
             }
+           
            if(this.motor.Active) this.motor.Angle = VectorToAngle(this.motor.Velocity);
         }
 
