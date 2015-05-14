@@ -14,7 +14,8 @@ namespace Zuzel
         public const int WINDOW_HEIGHT = 500;
 
         public const float MOTOR_ANGLE = 0.05F;
-        public const float MOTOR_ACC_SPEED = 0.4F;
+        public const float MOTOR_ACC_SPEED = 0.39F;
+        public const float MOTOR_ACC_SPEED_CLASSIC = 0.2F;
 
         public const int LAPS_NUMBER = 4;
         public const int ROUNDSTOURNAMENT = 10;

@@ -22,16 +22,32 @@ namespace Zuzel
         string motorName;
         SoundEffectInstance soundMotorInstance;
         bool soundIsPlaying;
+        float soundVolume;
+        float initialAccSpeed;
+        int mode;
      
 
           public Motor(string name,ContentManager contentManager, string spriteName, int x, int y, Vector2 velocity,
-            SoundEffect Sound, float soundVolume) : base(contentManager, spriteName, x, y, velocity, Sound)
+            SoundEffect Sound, float soundVolume, float accSpeed, int mode) : base(contentManager, spriteName, x, y, velocity, Sound)
             {
               this.angle = 0;  
               this.angleVelocity = 0;
-              this.friction = 0.04F;
-              this.accSpeed = 0.4F;
+              if(mode == 0)
+              {
+                  this.initialAccSpeed = accSpeed;
+                  this.friction = 0.04F;
+              }
+              if(mode==1)
+              {
+                  this.initialAccSpeed = accSpeed;
+                  this.friction = 0.065F;
+              }
+              
+              this.accSpeed = this.initialAccSpeed;
+              
               this.motorName = name;
+              this.soundVolume = soundVolume;
+              this.mode = mode;
 
 
               if (Sound != null)
@@ -151,30 +167,46 @@ namespace Zuzel
 
                   if(thrust)
                   {
-                      this.velocity.X += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.X;
-                      this.velocity.Y += GameConstants.MOTOR_ACC_SPEED * fowardVelocity.Y;
+                      this.velocity.X += this.accSpeed * fowardVelocity.X;
+                      this.velocity.Y += this.accSpeed * fowardVelocity.Y;
                  
                       
                   }
                   if(turning)
                   {
-                      this.accSpeed = GameConstants.MOTOR_ACC_SPEED - 0.2F;
+                      if(this.mode==1)
+                      {
+                          this.accSpeed = this.initialAccSpeed - 0.1F;
+                      }
+                      else
+                      {
+                          this.accSpeed = this.initialAccSpeed - 0.2F;
+                      }
+                      
                   }
                   else
                   {
-                      this.accSpeed = GameConstants.MOTOR_ACC_SPEED;
+                      if(this.mode==1)
+                      { 
+                          this.accSpeed = this.initialAccSpeed*1.5F;
+                      }
+                      else
+                      {
+                          this.accSpeed = this.initialAccSpeed;
+                      }
+                      
                   }
                   if(this.Sound!=null)
                   {
                       if (thrust)
                       {
                           this.soundMotorInstance.Pitch = 0.5f;
-                          soundMotorInstance.Volume = GameConstants.SFX_VOL;
+                          soundMotorInstance.Volume = this.soundVolume;
                       }
                       else
                       {
                           this.soundMotorInstance.Pitch = 0;
-                          soundMotorInstance.Volume = GameConstants.SFX_VOL - 0.2F;
+                          soundMotorInstance.Volume = this.soundVolume - 0.2F;
                        
                       }
                  

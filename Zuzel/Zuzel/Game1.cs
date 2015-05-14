@@ -21,7 +21,13 @@ namespace Zuzel
         #region Variables
 
         GraphicsDeviceManager graphics;
-
+        bool classicMode = false;
+        public enum Difficulty
+        {
+            Easy,
+            Hard
+        }
+        Difficulty difficulty;
         // The color data for the images; used for per pixel collision
         Texture2D mapGradTexture;
         Texture2D mapTexture;
@@ -112,7 +118,7 @@ namespace Zuzel
         bool soundPlaying3;
         bool soundON = true;
 
-        bool keyUup, keyYup;
+        bool keyUup, keyYup,keyTup,keyIup;
 
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
@@ -196,6 +202,8 @@ namespace Zuzel
             fpsMonitor = new FpsMonitor();
             keyUup = false;
             keyYup = false;
+            keyIup = false;
+            difficulty = Difficulty.Easy;
         }
 
         /// <summary>
@@ -332,21 +340,67 @@ namespace Zuzel
                 }
 
                 winner.Clear();
-                winner.Append("Options:                                          Made by:\n");
-                winner.Append("                                             www.krzykustudio.pl\n");
-
+                if(difficulty == Difficulty.Easy)
+                {
+                   winner.Append("I  - Difficulty Easy                             Made by:\n");
+                }
+                else
+                {
+                    winner.Append("I  - Difficulty Hard                              Made by:\n");
+                }
+                if(classicMode)
+                winner.Append("T - Classic mode ON                www.krzykustudio.pl\n");
+                else
+                    winner.Append("T - Classic mode OFF              www.krzykustudio.pl\n");
                 if (soundON)
                     winner.Append("U - Sound ON\n");
                 else
                     winner.Append("U - Sound OFF\n");
 
                 if (showFps)
-                    winner.Append("Y - Show fps ON                           Sounds from:\n");
+                    winner.Append("Y - Show fps ON                            Sounds from:\n");
                 else
                     winner.Append("Y - Show fps OFF                          Sounds from:\n");
 
                 winner.Append("M - Menu                                   www.freefx.co.uk\n");
-                winner.Append("ESC - Exit                                          2015\n"); 
+                winner.Append("ESC - Exit                                          2015\n");
+
+
+                //classic mode
+                if (keyboard.IsKeyDown(Keys.T) && keyTup)
+                {
+                    if (classicMode)
+                    {
+                        classicMode = false;
+                    }
+                    else
+                    {
+                        classicMode = true;
+                    }
+                    keyTup = false;
+                }
+                if (keyboard.IsKeyUp(Keys.T))
+                {
+                    keyTup = true;
+                }
+
+                //classic mode
+                if (keyboard.IsKeyDown(Keys.I) && keyIup)
+                {
+                    if (difficulty==Difficulty.Easy)
+                    {
+                        difficulty = Difficulty.Hard;
+                    }
+                    else
+                    {
+                        difficulty = Difficulty.Easy;
+                    }
+                    keyIup = false;
+                }
+                if (keyboard.IsKeyUp(Keys.I))
+                {
+                    keyIup = true;
+                }
             }
             #endregion
 
@@ -369,13 +423,31 @@ namespace Zuzel
                 positions.Add(1);
                 positions.Add(2);
                 positions.Add(3);
+                int mode;
+                float speed = GameConstants.MOTOR_ACC_SPEED;
+                if(difficulty == Difficulty.Easy)
+                {
+                    speed = GameConstants.MOTOR_ACC_SPEED;
+                }
+                if (difficulty == Difficulty.Hard)
+                {
+                    speed = GameConstants.MOTOR_ACC_SPEED+0.07F;
+                }
+
+                if(classicMode)
+                {
+                    mode = 1;
+                }
+                else{
+                    mode = 0;
+                }
 
                 pos = random.Next(positions.Count);
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning1");
                 motorRed = new Motor("Red    ", Content, "image\\motorred", (int)GameConstants.START_POS.X,
-                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL);
+                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL,speed,mode);
                 motors.Add(motorRed);
 
                 pos = random.Next(positions.Count);
@@ -383,7 +455,7 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning2");
                     motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
-                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound ,GameConstants.SFX_VOL);
+                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                               
                 
                 motors.Add(motorYellow);
@@ -393,7 +465,7 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorBlue = new Motor("Blue   ", Content, "image\\motorblue", (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                 motors.Add(motorBlue);
 
                 pos = random.Next(positions.Count);
@@ -401,13 +473,13 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorGreen = new Motor("Green ", Content, "image\\motorgreen", (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound,  GameConstants.SFX_VOL);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                 motors.Add(motorGreen);
 
                 //AI layers
-                aiGreen = new AIMotorMovement(motorGreen, checkAiPointsList);
-                aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList);
-                aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList);
+                aiGreen = new AIMotorMovement(motorGreen, checkAiPointsList,mode);
+                aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList,mode);
+                aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList,mode);
                
                 if(whatGame == WhatGame.Tournament)
                 {
@@ -536,21 +608,35 @@ namespace Zuzel
                 clock_elapsed = (int)gameTime.TotalGameTime.TotalMilliseconds;
                 // Move the player 
                 #region
+                
                 //RED
                 if (keyboard.IsKeyDown(Keys.Left))
                 {
-                    motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                    if(classicMode)
+                    {
+                        motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE - 0.02F; 
+                    }
+                    else
+                    {
+                        motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                    }
+                    
+                    
                     motorRed.Turning = true;
 
                 }
-                if (keyboard.IsKeyDown(Keys.Right))
+                if (keyboard.IsKeyDown(Keys.Right)&&classicMode==false)
                 {
                     motorRed.AngleVelocity = -GameConstants.MOTOR_ANGLE;
                     motorRed.Turning = true;
 
                 }
 
-                if (keyboard.IsKeyDown(Keys.Up))
+                if (keyboard.IsKeyDown(Keys.Up)&&classicMode==false)
+                {
+                    motorRed.Thrust = true;
+                }
+                else if(classicMode)
                 {
                     motorRed.Thrust = true;
                 }
@@ -565,17 +651,29 @@ namespace Zuzel
                     //YELLOW
                     if (keyboard.IsKeyDown(Keys.A))
                     {
-                        motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                        if(classicMode)
+                        {
+                            motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE - 0.02F;
+                        }
+                        else
+                        {
+                            motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
+                        }
+                        
                         motorYellow.Turning = true;
 
                     }
-                    if (keyboard.IsKeyDown(Keys.D))
+                    if (keyboard.IsKeyDown(Keys.D) && classicMode == false)
                     {
                         motorYellow.AngleVelocity = -GameConstants.MOTOR_ANGLE;
                         motorYellow.Turning = true;
 
                     }
-                    if (keyboard.IsKeyDown(Keys.W))
+                    if (keyboard.IsKeyDown(Keys.W) && classicMode == false)
+                    {
+                        motorYellow.Thrust = true;
+                    }
+                    else if(classicMode)
                     {
                         motorYellow.Thrust = true;
                     }

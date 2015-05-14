@@ -21,9 +21,9 @@ namespace Zuzel
         Random random = new Random();
         float speedRandom;
         int handlingDivider;
-        
+        int mode;
 
-        public AIMotorMovement(Motor motor, List<Rectangle> checkPointListAi)
+        public AIMotorMovement(Motor motor, List<Rectangle> checkPointListAi, int mode)
         {
             this.checkPointListAi = checkPointListAi;
             this.motor = motor;
@@ -33,6 +33,7 @@ namespace Zuzel
             this.currentCheckpoint = 0;
             this.speedRandom = 0.95F+0.01F*(float)random.Next(1,9);
             this.handlingDivider = 10;
+            this.mode = mode;
            
             this.currentLapCheckpoints = new List<int>();
             foreach(Rectangle rectangle in this.checkPointListAi)
@@ -83,15 +84,28 @@ namespace Zuzel
             if (gameTime.TotalGameTime.Milliseconds % this.handlingDivider == 0)
             {
                 float accSpeedIndex=1;
-                if(difference.Y < 0.2F&&difference.Y>-0.2F)
+                if (this.mode == 1)
                 {
-                    accSpeedIndex = 1.5F;
-                                }
+                    if (difference.Y < 0.3F && difference.Y > -0.3F)
+                    {
+                        accSpeedIndex = 1.8F;
+                    }
+                    else
+                    {
+                        accSpeedIndex = 1F;
+                    }
+                }
                 else
                 {
-                    accSpeedIndex = 1;
+                    if (difference.Y < 0.2F && difference.Y > -0.2F)
+                    {
+                        accSpeedIndex = 1.5F;
+                    }
+                    else
+                    {
+                        accSpeedIndex = 1;
+                    }
                 }
-                
                 this.motor.Velocity += (difference*accSpeedIndex*speedRandom);
                 
               
