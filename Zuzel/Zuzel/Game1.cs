@@ -31,7 +31,9 @@ namespace Zuzel
         // The color data for the images; used for per pixel collision
         Texture2D mapGradTexture;
         Texture2D mapTexture;
-        
+        Texture2D smokeTexture;
+        List<Vector2> smokeList = new List<Vector2>(); Random randomizer = new Random();
+
         Rectangle mapRectangle;
         Vector2 mapPosition;
         Color[] mapGradTextureData;
@@ -118,7 +120,11 @@ namespace Zuzel
         bool soundPlaying3;
         bool soundON = true;
 
-        bool keyUup, keyYup,keyTup,keyIup;
+        bool keyUup, keyYup,keyTup,keyIup,keyKup;
+
+        Skin skin;
+        Skin skin1;
+        Skin skin2;
 
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
@@ -165,13 +171,14 @@ namespace Zuzel
         /// </summary>
         protected override void LoadContent()
         {
-            
+            Skins();
+            skin = skin1;
             // Create a sprite batch to draw those textures
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
-            
+            mapTexture = skin.mapTexture;
             try
             {
-                mapTexture = Content.Load<Texture2D>("image\\map");
+                mapTexture = skin.mapTexture;
                 mapGradTexture = Content.Load<Texture2D>("image\\mapgrad");
                 //fonts
                 fontArial10 = Content.Load<SpriteFont>("fonts\\Arial10");
@@ -191,7 +198,7 @@ namespace Zuzel
             mapGradTexture.GetData(mapGradTextureData);
 
             // Get the bounding rectangle of this block
-            mapRectangle = new Rectangle(0, 0, mapTexture.Width, mapTexture.Height);
+            mapRectangle = new Rectangle(0, 0, skin.mapTexture.Width, skin.mapTexture.Height);
 
             finishMapRectangle = new Rectangle(457, 335, 1, 130);
 
@@ -203,7 +210,11 @@ namespace Zuzel
             keyUup = false;
             keyYup = false;
             keyIup = false;
+            keyKup = false;
             difficulty = Difficulty.Easy;
+
+            smokeTexture = Content.Load<Texture2D>("image\\smoke");
+           
         }
 
         /// <summary>
@@ -213,6 +224,7 @@ namespace Zuzel
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            mapTexture = skin.mapTexture;
             // Get input
             KeyboardState keyboard = Keyboard.GetState();
             GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
@@ -363,7 +375,7 @@ namespace Zuzel
                     winner.Append("Y - Show fps OFF                          Sounds from:\n");
 
                 winner.Append("M - Menu                                   www.freefx.co.uk\n");
-                winner.Append("ESC - Exit                                          2015\n");
+                winner.Append("K - "+skin.skinName+"                                             2015\n");
 
 
                 //classic mode
@@ -384,7 +396,7 @@ namespace Zuzel
                     keyTup = true;
                 }
 
-                //classic mode
+                //difficulty
                 if (keyboard.IsKeyDown(Keys.I) && keyIup)
                 {
                     if (difficulty==Difficulty.Easy)
@@ -400,6 +412,24 @@ namespace Zuzel
                 if (keyboard.IsKeyUp(Keys.I))
                 {
                     keyIup = true;
+                }
+
+                //Skin
+                if (keyboard.IsKeyDown(Keys.K) && keyKup)
+                {
+                    if (skin == skin1)
+                    {
+                        skin = skin2;
+                    }
+                    else
+                    {
+                        skin = skin1;
+                    }
+                    keyKup = false;
+                }
+                if (keyboard.IsKeyUp(Keys.K))
+                {
+                    keyKup = true;
                 }
             }
             #endregion
@@ -446,7 +476,7 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning1");
-                motorRed = new Motor("Red    ", Content, "image\\motorred", (int)GameConstants.START_POS.X,
+                motorRed = new Motor("Red    ", Content, skin.motorRed, (int)GameConstants.START_POS.X,
                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL,speed,mode);
                 motors.Add(motorRed);
 
@@ -454,7 +484,7 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning2");
-                    motorYellow = new Motor("Yellow", Content, "image\\motoryellow", (int)GameConstants.START_POS.X,
+                    motorYellow = new Motor("Yellow", Content, skin.motorYellow, (int)GameConstants.START_POS.X,
                              (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                               
                 
@@ -464,7 +494,7 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
-                motorBlue = new Motor("Blue   ", Content, "image\\motorblue", (int)GameConstants.START_POS.X,
+                motorBlue = new Motor("Blue   ", Content, skin.motorBlue, (int)GameConstants.START_POS.X,
                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                 motors.Add(motorBlue);
 
@@ -472,7 +502,7 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
-                motorGreen = new Motor("Green ", Content, "image\\motorgreen", (int)GameConstants.START_POS.X,
+                motorGreen = new Motor("Green ", Content, skin.motorGreen, (int)GameConstants.START_POS.X,
                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
                 motors.Add(motorGreen);
 
@@ -707,19 +737,19 @@ namespace Zuzel
                     motorek.Update(gameTime);
                     if (motorek.MotorName.Trim() == "Red")
                     {
-                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                        tireMarks.Add(new TireMark(Content, skin.motorRedTires, motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
                     }
                     if (motorek.MotorName.Trim() == "Green")
                     {
-                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                        tireMarks.Add(new TireMark(Content, skin.motorGreenTires, motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
                     }
                     if (motorek.MotorName.Trim() == "Blue")
                     {
-                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                        tireMarks.Add(new TireMark(Content, skin.motorBlueTires, motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
                     }
                     if (motorek.MotorName.Trim() == "Yellow")
                     {
-                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                        tireMarks.Add(new TireMark(Content, skin.motorYellowTires, motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
                     }
                     
                 }
@@ -760,8 +790,10 @@ namespace Zuzel
                     }
                 }
 
-                if (tireMarks.Count > 1000)
+                if (tireMarks.Count > skin.tireLongMark)
                 {
+                    tireMarks.RemoveAt(0);
+                    tireMarks.RemoveAt(0);
                     tireMarks.RemoveAt(0);
                 }
 
@@ -896,8 +928,19 @@ namespace Zuzel
             foreach (Motor motor in motors)
             {
                 motor.SoundOnOff(soundON,GameConstants.SFX_VOL);
+               
+                for (int i = 0; i < 5; i++)
+                {
+                    Vector2 smokePos = new Vector2(motor.DrawRectangle.Center.X, motor.DrawRectangle.Center.Y); 
+                    smokePos.X += randomizer.Next(10) - 5;
+                    smokePos.Y += randomizer.Next(10) - 5;
+                    smokeList.Add(smokePos);
+                }
             }
             fpsMonitor.Update();
+
+          
+
             base.Update(gameTime);
         }
         /// <summary>
@@ -910,6 +953,7 @@ namespace Zuzel
 
             spriteBatch.Begin();
             // Draw texture
+
             spriteBatch.Draw(mapTexture, mapPosition, Color.White);
             foreach (TireMark tireMark in tireMarks)
             {
@@ -921,7 +965,7 @@ namespace Zuzel
             {
                 motorek.Draw(spriteBatch);
             }
-
+            DrawSmoke();
             //draw checkpoints
             //DrawCheckpoints();
           
@@ -992,9 +1036,9 @@ namespace Zuzel
 
         public void Skins()
         {
-            Skin skin = new Skin();
-            Skin skin1 = new Skin();
-            Skin skin2 = new Skin();
+            skin = new Skin();
+            skin1 = new Skin();
+            skin2 = new Skin();
 
             skin1.background = "image\\map";
             skin1.motorRed = "image\\motorred";
@@ -1005,6 +1049,9 @@ namespace Zuzel
             skin1.motorBlueTires = "image\\tires";
             skin1.motorYellow = "image\\motoryellow";
             skin1.motorYellowTires = "image\\tires";
+            skin1.tireLongMark = 2000;
+            skin1.mapTexture = Content.Load<Texture2D>(skin1.background);
+            skin1.skinName = "Skin1";
 
             skin2.background = "image\\map2";
             skin2.motorRed = "image\\motorred2";
@@ -1015,10 +1062,18 @@ namespace Zuzel
             skin2.motorBlueTires = "image\\tireblue";
             skin2.motorYellow = "image\\motoryellow2";
             skin2.motorYellowTires = "image\\tireyellow";
+            skin2.tireLongMark = 15;
+            skin2.mapTexture = Content.Load<Texture2D>(skin2.background);
+            skin2.skinName = "Skin2";
 
 
         }
-
+       
+        private void DrawSmoke()
+        {
+            foreach (Vector2 smokePos in smokeList)
+                spriteBatch.Draw(smokeTexture, smokePos, null, Color.White, 0, new Vector2(40, 35), 0.2f, SpriteEffects.None, 1);
+        }
     }
 
 }
