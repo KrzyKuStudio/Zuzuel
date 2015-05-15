@@ -705,7 +705,23 @@ namespace Zuzel
                     }
 
                     motorek.Update(gameTime);
-                    tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                    if (motorek.MotorName.Trim() == "Red")
+                    {
+                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                    }
+                    if (motorek.MotorName.Trim() == "Green")
+                    {
+                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                    }
+                    if (motorek.MotorName.Trim() == "Blue")
+                    {
+                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                    }
+                    if (motorek.MotorName.Trim() == "Yellow")
+                    {
+                        tireMarks.Add(new TireMark(Content, "image\\tires", motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
+                    }
+                    
                 }
                 if (allMotorsActive == 0)
                 {
@@ -974,5 +990,35 @@ namespace Zuzel
             return vectorek;
         }
 
+        public void Skins()
+        {
+            Skin skin = new Skin();
+            Skin skin1 = new Skin();
+            Skin skin2 = new Skin();
+
+            skin1.background = "image\\map";
+            skin1.motorRed = "image\\motorred";
+            skin1.motorRedTires = "image\\tires";
+            skin1.motorGreen = "image\\motorgreen";
+            skin1.motorGreenTires = "image\\tires";
+            skin1.motorBlue = "image\\motorblue";
+            skin1.motorBlueTires = "image\\tires";
+            skin1.motorYellow = "image\\motoryellow";
+            skin1.motorYellowTires = "image\\tires";
+
+            skin2.background = "image\\map2";
+            skin2.motorRed = "image\\motorred2";
+            skin2.motorRedTires = "image\\tirered";
+            skin2.motorGreen = "image\\motorgreen2";
+            skin2.motorGreenTires = "image\\tiregreen";
+            skin2.motorBlue = "image\\motorblue2";
+            skin2.motorBlueTires = "image\\tireblue";
+            skin2.motorYellow = "image\\motoryellow2";
+            skin2.motorYellowTires = "image\\tireyellow";
+
+
+        }
+
     }
+
 }
