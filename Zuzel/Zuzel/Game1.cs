@@ -9,7 +9,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Storage;
+
 using System.Text;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace Zuzel
 {
@@ -136,21 +139,24 @@ namespace Zuzel
         bool keyUup, keyYup,keyTup,keyIup,keyKup;
 
         ////saving game data
-        public struct SaveGameData
+        StorageDevice device;
+        string containerName = "ZUZELOStorage";
+        string filename = "mysave.sav";
+        [Serializable]
+        public struct SaveGame
         {
-            public Skin skin;
-            public bool soundON;
-            public bool showFPS;
-            public Difficulty difficulty;
-            public bool classicMode;
+            public Skin skinSave;
+            public bool soundONSave;
+            public bool showFPSSave;
+            public Difficulty difficultySave;
+            public bool classicModeSave;
         }
+        
         Skin skin;
         Skin skin1;
         Skin skin2;
 
-        SaveGameData saveGameData;
-        StorageDevice device;
-
+            
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
         // Percentage of the screen on every side is the safe area
@@ -168,6 +174,7 @@ namespace Zuzel
 
         public Game1()
         {
+          
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
            
@@ -179,10 +186,7 @@ namespace Zuzel
 
             smokePlume = new SmokePlumeParticleSystem(this, 13);
             Components.Add(smokePlume);
-            
-           
-     
-            
+          //  this.Components.Add(new GamerServicesComponent(this));
         }
 
         /// <summary>
@@ -193,7 +197,9 @@ namespace Zuzel
         /// </summary>
         protected override void Initialize()
         {
+            
             base.Initialize();
+           
             gameState = GameState.Intro;
 
             // Calculate safe bounds based on current resolution
@@ -211,10 +217,14 @@ namespace Zuzel
         /// </summary>
         protected override void LoadContent()
         {
-            Skins();
-            skin = skin1;
+
             // Create a sprite batch to draw those textures
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
+            Skins();
+           
+            skin = skin1;
+            
+            
             mapTexture = skin.mapTexture;
             try
             {
@@ -226,11 +236,11 @@ namespace Zuzel
 
             catch
             {
-                this.Exit();
+                MyExit();
             }
             if (mapTexture == null || mapGradTexture == null || fontArial10 == null)
             {
-                this.Exit();
+                MyExit();
             }
 
 
@@ -252,8 +262,7 @@ namespace Zuzel
             keyIup = false;
             keyKup = false;
             difficulty = Difficulty.Easy;
-
-           
+            InitiateLoad();
            
         }
 
@@ -376,7 +385,7 @@ namespace Zuzel
                 if (gamePad.Buttons.Back == ButtonState.Pressed ||
                     keyboard.IsKeyDown(Keys.Escape))
                 {
-                    this.Exit();
+                    MyExit();
                 }
 
             }
@@ -389,7 +398,7 @@ namespace Zuzel
                 if (gamePad.Buttons.Back == ButtonState.Pressed ||
                     keyboard.IsKeyDown(Keys.Escape))
                 {
-                    this.Exit();
+                    MyExit();
                 }
 
                 winner.Clear();
@@ -995,8 +1004,9 @@ namespace Zuzel
             }
             
             fpsMonitor.Update();
-       
+           
             base.Update(gameTime);
+         
         }
         /// <summary>
         /// This is called when the game should draw itself.
@@ -1139,8 +1149,6 @@ namespace Zuzel
                
                 where.X = (float)x;
                 where.Y = (float)y;
-                //where.X = graphics.GraphicsDevice.Viewport.Width / 2;
-                //where.Y = graphics.GraphicsDevice.Viewport.Height;
                 smokePlume.AddParticles(where);
 
                 // and then reset the timer.
@@ -1148,28 +1156,79 @@ namespace Zuzel
             }
         }
 
-        private void LoadState()
+        private void InitiateSave()
         {
-            // Open a storage container.
-            IAsyncResult result =
-                device.BeginOpenContainer("StorageDemo", null, null);
-
-            // Wait for the WaitHandle to become signaled.
-            result.AsyncWaitHandle.WaitOne();
-
-            StorageContainer container = device.EndOpenContainer(result);
-
-            // Close the wait handle.
-            result.AsyncWaitHandle.Close();
-
-
-            string filename = "savegame.sav";
-
-            // Check to see whether the save exists.
-            if (container.FileExists(filename))
-                // Delete it so that we can create one fresh.
-                container.DeleteFile(filename);
+            
+                device = null;
+                StorageDevice.BeginShowSelector(PlayerIndex.One, this.SaveToDevice, null);
+            
         }
+
+        void SaveToDevice(IAsyncResult result)
+        {
+            device = StorageDevice.EndShowSelector(result);
+            if (device != null && device.IsConnected)
+            {
+                SaveGame SaveData = new SaveGame()
+                {
+                 skinSave = skin,
+                 soundONSave = soundON,
+                showFPSSave = showFps,
+                difficultySave = difficulty,
+                classicModeSave = classicMode
+                };
+                IAsyncResult r = device.BeginOpenContainer(containerName, null, null);
+                result.AsyncWaitHandle.WaitOne();
+                StorageContainer container = device.EndOpenContainer(r);
+                if (container.FileExists(filename))
+                    container.DeleteFile(filename);
+                Stream stream = container.CreateFile(filename);
+                XmlSerializer serializer = new XmlSerializer(typeof(SaveGame));
+                serializer.Serialize(stream, SaveData);
+                stream.Close();
+                container.Dispose();
+                result.AsyncWaitHandle.Close();
+            }
+        }
+
+        private void InitiateLoad()
+        {
+                device = null;
+                StorageDevice.BeginShowSelector(PlayerIndex.One, this.LoadFromDevice, null);
+            
+        }
+
+        public void LoadFromDevice(IAsyncResult result)
+        {
+            device = StorageDevice.EndShowSelector(result);
+            IAsyncResult r = device.BeginOpenContainer(containerName, null, null);
+            result.AsyncWaitHandle.WaitOne();
+            StorageContainer container = device.EndOpenContainer(r);
+            result.AsyncWaitHandle.Close();
+            if (container.FileExists(filename))
+            {
+                Stream stream = container.OpenFile(filename, FileMode.Open);
+                XmlSerializer serializer = new XmlSerializer(typeof(SaveGame));
+                SaveGame SaveData = (SaveGame)serializer.Deserialize(stream);
+                stream.Close();
+                container.Dispose();
+                //Update the game based on the save game file
+                
+                 //skin = SaveData.skinSave;
+                 soundON = SaveData.soundONSave;
+                 showFps = SaveData.showFPSSave;
+                 difficulty = SaveData.difficultySave;
+                 classicMode = SaveData.classicModeSave;
+            }
+        }
+        private void MyExit()
+        {
+            InitiateSave();
+            this.Exit();
+
+        }
+        
+
     }
 
 }

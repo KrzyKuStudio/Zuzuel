@@ -76,6 +76,7 @@
   <ItemGroup>
     <Compile Include="AIMotorMovement.cs" />
     <Compile Include="FpsMonitor.cs" />
+    <Compile Include="Handlers.cs" />
     <Compile Include="Intersect.cs" />
     <Compile Include="GameConstants.cs" />
     <Compile Include="Laps.cs" />
