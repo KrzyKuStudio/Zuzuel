@@ -34,7 +34,7 @@ namespace Zuzel
         /// </summary>
         protected override void InitializeConstants()
         {
-            textureFilename = "smoke";
+            textureFilename = "image\\smoke";
 
             minInitialSpeed = 1;
             maxInitialSpeed = 50;

@@ -159,7 +159,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="smoke.bmp">
+    <Compile Include="image\smoke.bmp">
       <Name>smoke</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>

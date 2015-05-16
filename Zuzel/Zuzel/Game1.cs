@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+//using Microsoft.Xna.Framework.Storage;
 using System.Text;
 
 namespace Zuzel
@@ -20,7 +21,9 @@ namespace Zuzel
     {
         #region Variables
 
+
         GraphicsDeviceManager graphics;
+        
         bool classicMode = false;
         public enum Difficulty
         {
@@ -132,9 +135,21 @@ namespace Zuzel
 
         bool keyUup, keyYup,keyTup,keyIup,keyKup;
 
+        //saving game data
+        public struct SaveGameData
+        {
+           // public Skin skin;
+            public bool soundON;
+            public bool showFPS;
+            public Difficulty difficulty;
+            public bool classicMode;
+        }
         Skin skin;
         Skin skin1;
         Skin skin2;
+
+        SaveGameData saveGameData;
+       // StorageDevice device;
 
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
@@ -147,13 +162,15 @@ namespace Zuzel
         float timeTillPuff = 0.0f;
 
 
+
+
 #endregion
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-
+           
 
             IsMouseVisible = GameConstants.VISIBLEMOUSE;
             // set resolution
@@ -162,6 +179,8 @@ namespace Zuzel
 
             smokePlume = new SmokePlumeParticleSystem(this, 13);
             Components.Add(smokePlume);
+            
+           
      
             
         }
@@ -1052,9 +1071,9 @@ namespace Zuzel
 
             checkAiPointsList = new List<Rectangle>();
             checkAiPointsList.Add(new Rectangle(575, 332, 1, 115));
-            checkAiPointsList.Add(new Rectangle(630, 322, 60, 60));
+            //checkAiPointsList.Add(new Rectangle(630, 322, 60, 60));
             checkAiPointsList.Add(new Rectangle(655, 252, 120, 1));
-            checkAiPointsList.Add(new Rectangle(640, 132, 60, 60));
+            //checkAiPointsList.Add(new Rectangle(640, 132, 60, 60));
             checkAiPointsList.Add(new Rectangle(575, 55, 1, 135));
             checkAiPointsList.Add(new Rectangle(340, 52, 60, 80));
             checkAiPointsList.Add(new Rectangle(205, 55, 1, 105));
@@ -1128,6 +1147,29 @@ namespace Zuzel
                 timeTillPuff = TimeBetweenSmokePlumePuffs;
             }
         }
+
+        //private void LoadState()
+        //{
+        //    // Open a storage container.
+        //    IAsyncResult result =
+        //        device.BeginOpenContainer("StorageDemo", null, null);
+
+        //    // Wait for the WaitHandle to become signaled.
+        //    result.AsyncWaitHandle.WaitOne();
+
+        //    StorageContainer container = device.EndOpenContainer(result);
+
+        //    // Close the wait handle.
+        //    result.AsyncWaitHandle.Close();
+            
+            
+        //    string filename = "savegame.sav";
+
+        //    // Check to see whether the save exists.
+        //    if (container.FileExists(filename))
+        //        // Delete it so that we can create one fresh.
+        //        container.DeleteFile(filename);
+        //}
     }
 
 }
