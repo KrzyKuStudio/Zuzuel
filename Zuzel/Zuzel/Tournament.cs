@@ -54,7 +54,7 @@ namespace Zuzel
             players.Find(x => x.Name.Contains(name)).AddScore(score, time);
            
         }
-        public string ToString()
+        public override string ToString()
         {
             StringBuilder scores = new StringBuilder();
             scores.Clear();

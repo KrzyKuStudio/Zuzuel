@@ -31,8 +31,7 @@ namespace Zuzel
         // The color data for the images; used for per pixel collision
         Texture2D mapGradTexture;
         Texture2D mapTexture;
-        Texture2D smokeTexture;
-        List<Vector2> smokeList = new List<Vector2>(); Random randomizer = new Random();
+        SmokePlumeParticleSystem smokePlume;
 
         Rectangle mapRectangle;
         Vector2 mapPosition;
@@ -111,9 +110,20 @@ namespace Zuzel
         WhatGame whatGame;
 
         // The images will be drawn with this SpriteBatch
+        
         SpriteBatch spriteBatch;
+        public SpriteBatch SpriteBatch
+        {
+            get { return spriteBatch; }
+        }
 
-        Random random = new Random();
+        //Random random = new Random();
+        private static Random random = new Random();
+        public static Random Random
+        {
+            get { return random; }
+        }
+
         bool soundPlayingGO; 
         bool soundPlaying1; 
         bool soundPlaying2;
@@ -131,6 +141,12 @@ namespace Zuzel
         // Percentage of the screen on every side is the safe area
         const float SafeAreaPortion = 0.01f;
 
+        // keep a timer that will tell us when it's time to add more particles to the
+        // smoke plume.
+        const float TimeBetweenSmokePlumePuffs = 0.05f;
+        float timeTillPuff = 0.0f;
+
+
 #endregion
 
         public Game1()
@@ -143,6 +159,11 @@ namespace Zuzel
             // set resolution
             graphics.PreferredBackBufferWidth = GameConstants.WINDOW_WIDTH;
             graphics.PreferredBackBufferHeight = GameConstants.WINDOW_HEIGHT;
+
+            smokePlume = new SmokePlumeParticleSystem(this, 13);
+            Components.Add(smokePlume);
+     
+            
         }
 
         /// <summary>
@@ -213,7 +234,7 @@ namespace Zuzel
             keyKup = false;
             difficulty = Difficulty.Easy;
 
-            smokeTexture = Content.Load<Texture2D>("image\\smoke");
+           
            
         }
 
@@ -226,6 +247,7 @@ namespace Zuzel
         {
             mapTexture = skin.mapTexture;
             // Get input
+      
             KeyboardState keyboard = Keyboard.GetState();
             GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
             #region Allways keys
@@ -453,8 +475,10 @@ namespace Zuzel
                 positions.Add(1);
                 positions.Add(2);
                 positions.Add(3);
+
                 int mode;
                 float speed = GameConstants.MOTOR_ACC_SPEED;
+                
                 if(difficulty == Difficulty.Easy)
                 {
                     speed = GameConstants.MOTOR_ACC_SPEED;
@@ -484,10 +508,8 @@ namespace Zuzel
                 index = positions[pos];
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning2");
-                    motorYellow = new Motor("Yellow", Content, skin.motorYellow, (int)GameConstants.START_POS.X,
+                motorYellow = new Motor("Yellow", Content, skin.motorYellow, (int)GameConstants.START_POS.X,
                              (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
-                              
-                
                 motors.Add(motorYellow);
 
                 pos = random.Next(positions.Count);
@@ -511,6 +533,7 @@ namespace Zuzel
                 aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList,mode);
                 aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList,mode);
                
+                // if tournament add players to tournament
                 if(whatGame == WhatGame.Tournament)
                 {
                  if(tournament.State == Tournament.TournamentState.NewGame)
@@ -532,6 +555,9 @@ namespace Zuzel
             #endregion
 
             #region Counting
+            //Odliczanie
+            
+
             if (gameState == GameState.Counting)
             {
                 SoundEffect counting;
@@ -620,7 +646,6 @@ namespace Zuzel
                 lapsMotorBlue = new Laps(motorBlue, checkPointsList, finishMapRectangle, GameConstants.LAPS_NUMBER, clock);
                 laps.Add(lapsMotorBlue);
 
-
                 gameState = GameState.Playing;
             }
             #endregion
@@ -636,8 +661,8 @@ namespace Zuzel
                  
                 }
                 clock_elapsed = (int)gameTime.TotalGameTime.TotalMilliseconds;
-                // Move the player 
-                #region
+                
+               #region Move the player
                 
                 //RED
                 if (keyboard.IsKeyDown(Keys.Left))
@@ -753,6 +778,7 @@ namespace Zuzel
                     }
                     
                 }
+
                 if (allMotorsActive == 0)
                 {
                     gameState = GameState.GameOver;
@@ -924,23 +950,33 @@ namespace Zuzel
 
             }
             #endregion
-            
+
+            //motors sounds on of
             foreach (Motor motor in motors)
             {
                 motor.SoundOnOff(soundON,GameConstants.SFX_VOL);
-               
-                for (int i = 0; i < 5; i++)
+      
+            }
+         
+            //update fog 
+            float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+           
+            if(skin == skin1)
+            {
+                foreach (Motor motor in motors)
                 {
-                    Vector2 smokePos = new Vector2(motor.DrawRectangle.Center.X, motor.DrawRectangle.Center.Y); 
-                    smokePos.X += randomizer.Next(10) - 5;
-                    smokePos.Y += randomizer.Next(10) - 5;
-                    smokeList.Add(smokePos);
+                    //add new smoke
+                    if (motor.Active)
+                    {
+                        int X = (int)(Math.Cos(motor.Angle) * -motor.DrawRectangle.Width / 2) + motor.DrawRectangle.Center.X;
+                        int Y = (int)(Math.Sin(motor.Angle) * motor.DrawRectangle.Height) + motor.DrawRectangle.Center.Y;
+                        UpdateSmokePlume(dt, X, Y);
+                    }
                 }
             }
+            
             fpsMonitor.Update();
-
-          
-             
+       
             base.Update(gameTime);
         }
         /// <summary>
@@ -965,7 +1001,7 @@ namespace Zuzel
             {
                 motorek.Draw(spriteBatch);
             }
-            DrawSmoke();
+     
             //draw checkpoints
             //DrawCheckpoints();
           
@@ -994,6 +1030,7 @@ namespace Zuzel
 
         private string DisplayClock(int clock)
         {
+            //convert miliseonds to 0:0:0
             string time;
             time = ((((clock) / 60000) % 60)).ToString() + ":" +
                    (((clock) % 60000) / 1000).ToString() + ":" +
@@ -1016,15 +1053,15 @@ namespace Zuzel
             checkAiPointsList = new List<Rectangle>();
             checkAiPointsList.Add(new Rectangle(575, 332, 1, 115));
             checkAiPointsList.Add(new Rectangle(630, 322, 60, 60));
-            checkAiPointsList.Add(new Rectangle(655, 252, 130, 1));
+            checkAiPointsList.Add(new Rectangle(655, 252, 120, 1));
             checkAiPointsList.Add(new Rectangle(640, 132, 60, 60));
-            checkAiPointsList.Add(new Rectangle(575, 35, 1, 135));
+            checkAiPointsList.Add(new Rectangle(575, 55, 1, 135));
             checkAiPointsList.Add(new Rectangle(340, 52, 60, 80));
             checkAiPointsList.Add(new Rectangle(205, 55, 1, 105));
-            checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
-            checkAiPointsList.Add(new Rectangle(13, 252, 134, 1));
+           // checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
+            checkAiPointsList.Add(new Rectangle(33, 252, 134, 1));
             //checkAiPointsList.Add(new Rectangle(130, 332, 50, 50));
-            checkAiPointsList.Add(new Rectangle(200, 342, 1, 135));
+            checkAiPointsList.Add(new Rectangle(200, 342, 1, 125));
             //checkAiPointsList.Add(new Rectangle(340, 332, 30, 130));
         }
 
@@ -1049,7 +1086,7 @@ namespace Zuzel
             skin1.motorBlueTires = "image\\tires";
             skin1.motorYellow = "image\\motoryellow";
             skin1.motorYellowTires = "image\\tires";
-            skin1.tireLongMark = 2000;
+            skin1.tireLongMark = 3000;
             skin1.mapTexture = Content.Load<Texture2D>(skin1.background);
             skin1.skinName = "Skin1";
 
@@ -1066,13 +1103,30 @@ namespace Zuzel
             skin2.mapTexture = Content.Load<Texture2D>(skin2.background);
             skin2.skinName = "Skin2";
 
-
         }
-       
-        private void DrawSmoke()
+
+        public static float RandomBetween(float min, float max)
         {
-            foreach (Vector2 smokePos in smokeList)
-                spriteBatch.Draw(smokeTexture, smokePos, null, Color.White, 0, new Vector2(40, 35), 0.2f, SpriteEffects.None, 1);
+            return min + (float)random.NextDouble() * (max - min);
+        }
+
+        private void UpdateSmokePlume(float dt,int x , int y)
+        {
+            timeTillPuff -= dt;
+            if (timeTillPuff < 0)
+            {
+                Vector2 where = Vector2.Zero;
+                // add more particles at the bottom of the screen, halfway across.
+               
+                where.X = (float)x;
+                where.Y = (float)y;
+                //where.X = graphics.GraphicsDevice.Viewport.Width / 2;
+                //where.Y = graphics.GraphicsDevice.Viewport.Height;
+                smokePlume.AddParticles(where);
+
+                // and then reset the timer.
+                timeTillPuff = TimeBetweenSmokePlumePuffs;
+            }
         }
     }
 

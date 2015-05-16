@@ -118,7 +118,7 @@ namespace Zuzel
            
 
 
-        public void Draw(SpriteBatch spriteBatch)
+        public new void Draw(SpriteBatch spriteBatch)
         {
             Vector2 origin = new Vector2(drawRectangle.Width/2, drawRectangle.Height/2);
             Vector2 position = new Vector2(drawRectangle.X, drawRectangle.Y);
@@ -150,7 +150,7 @@ namespace Zuzel
               return Math.Sqrt((point1.X - point2.X) * (point1.X - point2.X) + (point1.Y - point2.Y) * (point1.Y - point2.Y));
           }
 
-          public void Update(GameTime gameTime)
+          public new void Update(GameTime gameTime)
           {
 
               if (Active == true)
