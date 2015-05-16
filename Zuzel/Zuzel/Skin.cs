@@ -12,7 +12,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace Zuzel
 {
-    class Skin
+    public class Skin
     {
         public string background;
         public string motorYellow;

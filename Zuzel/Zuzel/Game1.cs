@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-//using Microsoft.Xna.Framework.Storage;
+using Microsoft.Xna.Framework.Storage;
 using System.Text;
 
 namespace Zuzel
@@ -135,10 +135,10 @@ namespace Zuzel
 
         bool keyUup, keyYup,keyTup,keyIup,keyKup;
 
-        //saving game data
+        ////saving game data
         public struct SaveGameData
         {
-           // public Skin skin;
+            public Skin skin;
             public bool soundON;
             public bool showFPS;
             public Difficulty difficulty;
@@ -149,7 +149,7 @@ namespace Zuzel
         Skin skin2;
 
         SaveGameData saveGameData;
-       // StorageDevice device;
+        StorageDevice device;
 
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
@@ -1148,28 +1148,28 @@ namespace Zuzel
             }
         }
 
-        //private void LoadState()
-        //{
-        //    // Open a storage container.
-        //    IAsyncResult result =
-        //        device.BeginOpenContainer("StorageDemo", null, null);
+        private void LoadState()
+        {
+            // Open a storage container.
+            IAsyncResult result =
+                device.BeginOpenContainer("StorageDemo", null, null);
 
-        //    // Wait for the WaitHandle to become signaled.
-        //    result.AsyncWaitHandle.WaitOne();
+            // Wait for the WaitHandle to become signaled.
+            result.AsyncWaitHandle.WaitOne();
 
-        //    StorageContainer container = device.EndOpenContainer(result);
+            StorageContainer container = device.EndOpenContainer(result);
 
-        //    // Close the wait handle.
-        //    result.AsyncWaitHandle.Close();
-            
-            
-        //    string filename = "savegame.sav";
+            // Close the wait handle.
+            result.AsyncWaitHandle.Close();
 
-        //    // Check to see whether the save exists.
-        //    if (container.FileExists(filename))
-        //        // Delete it so that we can create one fresh.
-        //        container.DeleteFile(filename);
-        //}
+
+            string filename = "savegame.sav";
+
+            // Check to see whether the save exists.
+            if (container.FileExists(filename))
+                // Delete it so that we can create one fresh.
+                container.DeleteFile(filename);
+        }
     }
 
 }
