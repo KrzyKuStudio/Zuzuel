@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Storage;
 
 using System.Text;
@@ -26,7 +23,7 @@ namespace Zuzel
 
 
         GraphicsDeviceManager graphics;
-        
+
         bool classicMode = false;
         public enum Difficulty
         {
@@ -70,7 +67,7 @@ namespace Zuzel
         List<AIMotorMovement> aiMovement = new List<AIMotorMovement>();
 
         StringBuilder winner;
-      
+
 
         //clock
         int clock;
@@ -116,7 +113,7 @@ namespace Zuzel
         WhatGame whatGame;
 
         // The images will be drawn with this SpriteBatch
-        
+
         SpriteBatch spriteBatch;
         public SpriteBatch SpriteBatch
         {
@@ -130,13 +127,13 @@ namespace Zuzel
             get { return random; }
         }
 
-        bool soundPlayingGO; 
-        bool soundPlaying1; 
+        bool soundPlayingGO;
+        bool soundPlaying1;
         bool soundPlaying2;
         bool soundPlaying3;
         bool soundON = true;
 
-        bool keyUup, keyYup,keyTup,keyIup,keyKup;
+        bool keyUup, keyYup, keyTup, keyIup, keyKup;
 
         ////saving game data
         StorageDevice device;
@@ -151,12 +148,12 @@ namespace Zuzel
             public Difficulty difficultySave;
             public bool classicModeSave;
         }
-        
+
         Skin skin;
         Skin skin1;
         Skin skin2;
 
-            
+
         // The sub-rectangle of the drawable area which should be visible on all TVs
         Rectangle safeBounds;
         // Percentage of the screen on every side is the safe area
@@ -170,14 +167,14 @@ namespace Zuzel
 
 
 
-#endregion
+        #endregion
 
         public Game1()
         {
-          
+
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
-           
+
 
             IsMouseVisible = GameConstants.VISIBLEMOUSE;
             // set resolution
@@ -186,7 +183,7 @@ namespace Zuzel
 
             smokePlume = new SmokePlumeParticleSystem(this, 13);
             Components.Add(smokePlume);
-          //  this.Components.Add(new GamerServicesComponent(this));
+            //  this.Components.Add(new GamerServicesComponent(this));
         }
 
         /// <summary>
@@ -197,9 +194,9 @@ namespace Zuzel
         /// </summary>
         protected override void Initialize()
         {
-            
+
             base.Initialize();
-           
+
             gameState = GameState.Intro;
 
             // Calculate safe bounds based on current resolution
@@ -221,11 +218,14 @@ namespace Zuzel
             // Create a sprite batch to draw those textures
             spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
             Skins();
-           
+            //default skint
             skin = skin1;
-            
-            
+            skin.mapTexture = skin1.mapTexture;
+            difficulty = Difficulty.Easy;
+
+            InitiateLoad();
             mapTexture = skin.mapTexture;
+            //check if images exists;
             try
             {
                 mapTexture = skin.mapTexture;
@@ -233,7 +233,6 @@ namespace Zuzel
                 //fonts
                 fontArial10 = Content.Load<SpriteFont>("fonts\\Arial10");
             }
-
             catch
             {
                 MyExit();
@@ -242,7 +241,6 @@ namespace Zuzel
             {
                 MyExit();
             }
-
 
             mapGradTextureData = new Color[mapGradTexture.Width * mapGradTexture.Height];
             mapGradTexture.GetData(mapGradTextureData);
@@ -261,9 +259,9 @@ namespace Zuzel
             keyYup = false;
             keyIup = false;
             keyKup = false;
-            difficulty = Difficulty.Easy;
-            InitiateLoad();
-           
+
+
+
         }
 
         /// <summary>
@@ -273,64 +271,28 @@ namespace Zuzel
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            mapTexture = skin.mapTexture;
+             mapTexture = skin.mapTexture;
             // Get input
-      
+
             KeyboardState keyboard = Keyboard.GetState();
             GamePadState gamePad = GamePad.GetState(PlayerIndex.One);
             #region Allways keys
 
             // back to menu
-            if ( keyboard.IsKeyDown(Keys.M))
+            if (keyboard.IsKeyDown(Keys.M) && gameState != GameState.Options)
             {
                 gameState = GameState.Intro;
                 ////turn off all sounds
-                foreach(Motor motor in motors)
+                foreach (Motor motor in motors)
                 {
                     motor.Active = false;
                     motor.Update(gameTime);
                 }
             }
-            //sounds on off
-            if (keyboard.IsKeyDown(Keys.U)&&keyUup)
-            {
-                if(soundON)
-                {
-                   soundON = false;
-                }
-                else
-                {
-                    soundON = true;
-                }
-                keyUup = false;
-            }
-             if (keyboard.IsKeyUp(Keys.U))
-            {
-                keyUup = true;
-            }
 
-            //show fps
-            if (keyboard.IsKeyDown(Keys.Y)&&keyYup)
-            {
-                if (showFps)
-                {
-                    showFps = false;
-                }
-                else
-                {
-                    showFps = true;
-                }
-                keyYup = false;
 
-            }
+            #endregion
 
-                if (keyboard.IsKeyUp(Keys.Y))
-                {
-                    keyYup = true;
-                }
-              
-#endregion
-                    
             #region Intro
             if (gameState == GameState.Intro)
             {
@@ -354,7 +316,7 @@ namespace Zuzel
                 if (keyboard.IsKeyDown(Keys.O))
                 {
                     gameState = GameState.Options;
-                    
+
                 }
                 //new game
                 if (keyboard.IsKeyDown(Keys.N))
@@ -392,7 +354,7 @@ namespace Zuzel
             #endregion
 
             #region Options
-            if(gameState == GameState.Options)
+            if (gameState == GameState.Options)
             {
                 // Allows the game to exit
                 if (gamePad.Buttons.Back == ButtonState.Pressed ||
@@ -400,18 +362,31 @@ namespace Zuzel
                 {
                     MyExit();
                 }
+                // back to menu
+                if (keyboard.IsKeyDown(Keys.M))
+                {
+                    gameState = GameState.Intro;
+                    ////turn off all sounds
+                    foreach (Motor motor in motors)
+                    {
+                        motor.Active = false;
+                        motor.Update(gameTime);
+                    }
+                    InitiateSave();
+                }
+
 
                 winner.Clear();
-                if(difficulty == Difficulty.Easy)
+                if (difficulty == Difficulty.Easy)
                 {
-                   winner.Append("I  - Difficulty Easy                             Made by:\n");
+                    winner.Append("I  - Difficulty Easy                             Made by:\n");
                 }
                 else
                 {
                     winner.Append("I  - Difficulty Hard                              Made by:\n");
                 }
-                if(classicMode)
-                winner.Append("T - Classic mode ON                www.krzykustudio.pl\n");
+                if (classicMode)
+                    winner.Append("T - Classic mode ON                www.krzykustudio.pl\n");
                 else
                     winner.Append("T - Classic mode OFF              www.krzykustudio.pl\n");
                 if (soundON)
@@ -425,7 +400,7 @@ namespace Zuzel
                     winner.Append("Y - Show fps OFF                          Sounds from:\n");
 
                 winner.Append("M - Menu                                   www.freefx.co.uk\n");
-                winner.Append("K - "+skin.skinName+"                                             2015\n");
+                winner.Append("K - " + skin.skinName + "                                             2015\n");
 
 
                 //classic mode
@@ -449,7 +424,7 @@ namespace Zuzel
                 //difficulty
                 if (keyboard.IsKeyDown(Keys.I) && keyIup)
                 {
-                    if (difficulty==Difficulty.Easy)
+                    if (difficulty == Difficulty.Easy)
                     {
                         difficulty = Difficulty.Hard;
                     }
@@ -481,6 +456,45 @@ namespace Zuzel
                 {
                     keyKup = true;
                 }
+
+                //sounds on off
+                if (keyboard.IsKeyDown(Keys.U) && keyUup)
+                {
+                    if (soundON)
+                    {
+                        soundON = false;
+                    }
+                    else
+                    {
+                        soundON = true;
+                    }
+                    keyUup = false;
+                }
+                if (keyboard.IsKeyUp(Keys.U))
+                {
+                    keyUup = true;
+                }
+
+                //show fps
+                if (keyboard.IsKeyDown(Keys.Y) && keyYup)
+                {
+                    if (showFps)
+                    {
+                        showFps = false;
+                    }
+                    else
+                    {
+                        showFps = true;
+                    }
+                    keyYup = false;
+
+                }
+
+                if (keyboard.IsKeyUp(Keys.Y))
+                {
+                    keyYup = true;
+                }
+
             }
             #endregion
 
@@ -506,21 +520,22 @@ namespace Zuzel
 
                 int mode;
                 float speed = GameConstants.MOTOR_ACC_SPEED;
-                
-                if(difficulty == Difficulty.Easy)
+
+                if (difficulty == Difficulty.Easy)
                 {
                     speed = GameConstants.MOTOR_ACC_SPEED;
                 }
                 if (difficulty == Difficulty.Hard)
                 {
-                    speed = GameConstants.MOTOR_ACC_SPEED+0.07F;
+                    speed = GameConstants.MOTOR_ACC_SPEED + 0.07F;
                 }
 
-                if(classicMode)
+                if (classicMode)
                 {
                     mode = 1;
                 }
-                else{
+                else
+                {
                     mode = 0;
                 }
 
@@ -529,7 +544,7 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning1");
                 motorRed = new Motor("Red    ", Content, skin.motorRed, (int)GameConstants.START_POS.X,
-                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL,speed,mode);
+                            (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed, mode);
                 motors.Add(motorRed);
 
                 pos = random.Next(positions.Count);
@@ -537,7 +552,7 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning2");
                 motorYellow = new Motor("Yellow", Content, skin.motorYellow, (int)GameConstants.START_POS.X,
-                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
+                             (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed, mode);
                 motors.Add(motorYellow);
 
                 pos = random.Next(positions.Count);
@@ -545,7 +560,7 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorBlue = new Motor("Blue   ", Content, skin.motorBlue, (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed, mode);
                 motors.Add(motorBlue);
 
                 pos = random.Next(positions.Count);
@@ -553,25 +568,25 @@ namespace Zuzel
                 positions.RemoveAt(pos);
                 motorSound = Content.Load<SoundEffect>("audio\\motorRunning3");
                 motorGreen = new Motor("Green ", Content, skin.motorGreen, (int)GameConstants.START_POS.X,
-                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed,mode);
+                           (int)GameConstants.START_POS.Y + 27 * index, new Vector2(0, 0), motorSound, GameConstants.SFX_VOL, speed, mode);
                 motors.Add(motorGreen);
 
                 //AI layers
-                aiGreen = new AIMotorMovement(motorGreen, checkAiPointsList,mode);
-                aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList,mode);
-                aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList,mode);
-               
+                aiGreen = new AIMotorMovement(motorGreen, checkAiPointsList, mode);
+                aiBlue = new AIMotorMovement(motorBlue, checkAiPointsList, mode);
+                aiYellow = new AIMotorMovement(motorYellow, checkAiPointsList, mode);
+
                 // if tournament add players to tournament
-                if(whatGame == WhatGame.Tournament)
+                if (whatGame == WhatGame.Tournament)
                 {
-                 if(tournament.State == Tournament.TournamentState.NewGame)
-                 {
-                     foreach(Motor motor in motors)
-                     {
-                         tournament.AddPlayer(motor.MotorName);
-                      }
-                     tournament.State = Tournament.TournamentState.Playing;
-                 }
+                    if (tournament.State == Tournament.TournamentState.NewGame)
+                    {
+                        foreach (Motor motor in motors)
+                        {
+                            tournament.AddPlayer(motor.MotorName);
+                        }
+                        tournament.State = Tournament.TournamentState.Playing;
+                    }
 
                 }
 
@@ -584,12 +599,12 @@ namespace Zuzel
 
             #region Counting
             //Odliczanie
-            
+
 
             if (gameState == GameState.Counting)
             {
                 SoundEffect counting;
-                 counting = Content.Load<SoundEffect>("audio\\tick");
+                counting = Content.Load<SoundEffect>("audio\\tick");
                 SoundEffectInstance instance;
                 instance = counting.CreateInstance();
                 instance.IsLooped = false;
@@ -597,13 +612,13 @@ namespace Zuzel
 
                 if ((int)gameTime.TotalGameTime.TotalSeconds - clock == 2)
                 {
-                  
-                    if(!soundPlaying3)
-                    { 
+
+                    if (!soundPlaying3)
+                    {
                         instance.Play();
-                         soundPlaying3 = true;
+                        soundPlaying3 = true;
                     }
-                    
+
                     winner.Append("                                 *********\n");
                     winner.Append("                                         **\n");
                     winner.Append("                                         **\n");
@@ -644,11 +659,11 @@ namespace Zuzel
                     winner.Append("                                         **\n");
                     winner.Append("                                       ****\n");
                 }
-                if ((int)gameTime.TotalGameTime.TotalSeconds - clock >=5)
+                if ((int)gameTime.TotalGameTime.TotalSeconds - clock >= 5)
                 {
                     if (!soundPlayingGO)
                     {
-                        counting = Content.Load<SoundEffect>("audio\\tack"); 
+                        counting = Content.Load<SoundEffect>("audio\\tack");
                         counting.Play();
                         soundPlayingGO = true;
                     }
@@ -656,7 +671,7 @@ namespace Zuzel
                 }
 
 
-              
+
             }
             #endregion
 
@@ -681,45 +696,45 @@ namespace Zuzel
             #region Game Playing
             if (gameState == GameState.Playing)
             {
-                      
+
                 foreach (Motor motorek in motors)
                 {
                     motorek.AngleVelocity = 0.0F;
                     motorek.Turning = false;
-                 
+
                 }
                 clock_elapsed = (int)gameTime.TotalGameTime.TotalMilliseconds;
-                
-               #region Move the player
-                
+
+                #region Move the player
+
                 //RED
                 if (keyboard.IsKeyDown(Keys.Left))
                 {
-                    if(classicMode)
+                    if (classicMode)
                     {
-                        motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE - 0.02F; 
+                        motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE - 0.02F;
                     }
                     else
                     {
                         motorRed.AngleVelocity = GameConstants.MOTOR_ANGLE;
                     }
-                    
-                    
+
+
                     motorRed.Turning = true;
 
                 }
-                if (keyboard.IsKeyDown(Keys.Right)&&classicMode==false)
+                if (keyboard.IsKeyDown(Keys.Right) && classicMode == false)
                 {
                     motorRed.AngleVelocity = -GameConstants.MOTOR_ANGLE;
                     motorRed.Turning = true;
 
                 }
 
-                if (keyboard.IsKeyDown(Keys.Up)&&classicMode==false)
+                if (keyboard.IsKeyDown(Keys.Up) && classicMode == false)
                 {
                     motorRed.Thrust = true;
                 }
-                else if(classicMode)
+                else if (classicMode)
                 {
                     motorRed.Thrust = true;
                 }
@@ -734,7 +749,7 @@ namespace Zuzel
                     //YELLOW
                     if (keyboard.IsKeyDown(Keys.A))
                     {
-                        if(classicMode)
+                        if (classicMode)
                         {
                             motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE - 0.02F;
                         }
@@ -742,7 +757,7 @@ namespace Zuzel
                         {
                             motorYellow.AngleVelocity = GameConstants.MOTOR_ANGLE;
                         }
-                        
+
                         motorYellow.Turning = true;
 
                     }
@@ -756,7 +771,7 @@ namespace Zuzel
                     {
                         motorYellow.Thrust = true;
                     }
-                    else if(classicMode)
+                    else if (classicMode)
                     {
                         motorYellow.Thrust = true;
                     }
@@ -804,24 +819,24 @@ namespace Zuzel
                     {
                         tireMarks.Add(new TireMark(Content, skin.motorYellowTires, motorek.DrawRectangle.Center.X, motorek.DrawRectangle.Center.Y));
                     }
-                    
+
                 }
 
                 if (allMotorsActive == 0)
                 {
                     gameState = GameState.GameOver;
                 }
-             
+
 
                 //update playing 
                 foreach (Laps lap in laps)
                 {
                     lap.Update(gameTime, clock_elapsed - clock);
-                   
+
                 }
 
                 // build playing string
-                if(gameTime.TotalGameTime.TotalMilliseconds- clock<500)
+                if (gameTime.TotalGameTime.TotalMilliseconds - clock < 500)
                 {
                     winner.Clear();
                     winner.Append("                           ********      ********\n");
@@ -886,7 +901,7 @@ namespace Zuzel
                         int score = 3;
                         foreach (Laps lap in lapsWinner)
                         {
-                            tournament.AddTimes(lap.MotorName, score,lap.LapTime);
+                            tournament.AddTimes(lap.MotorName, score, lap.LapTime);
                             score--;
                         }
                     }
@@ -900,7 +915,7 @@ namespace Zuzel
                 else
                 {
                     winner.Clear();
-                    if(whatGame == WhatGame.singleGame)
+                    if (whatGame == WhatGame.singleGame)
                     {
                         winner.Append("Nobody wins           SPACE for main screen\n\n");
 
@@ -909,7 +924,7 @@ namespace Zuzel
                     {
                         winner.Append("Nobody wins           SPACE for tournament screen\n\n");
                     }
-                    
+
 
                 }
                 gameState = GameState.DisplayResults;
@@ -920,7 +935,7 @@ namespace Zuzel
             if (gameState == GameState.DisplayResults)
             {
                 //intro screen
-                if (keyboard.IsKeyDown(Keys.Space)&&whatGame==WhatGame.singleGame)
+                if (keyboard.IsKeyDown(Keys.Space) && whatGame == WhatGame.singleGame)
                 {
                     gameState = GameState.Intro;
                 }
@@ -973,7 +988,7 @@ namespace Zuzel
                 if (keyboard.IsKeyDown(Keys.Space) && ((int)gameTime.TotalGameTime.TotalSeconds - clock) >= 1)
                 {
                     gameState = GameState.Intro;
-                    
+
                 }
 
             }
@@ -982,14 +997,14 @@ namespace Zuzel
             //motors sounds on of
             foreach (Motor motor in motors)
             {
-                motor.SoundOnOff(soundON,GameConstants.SFX_VOL);
-      
+                motor.SoundOnOff(soundON, GameConstants.SFX_VOL);
+
             }
-         
+
             //update fog 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-           
-            if(skin == skin1)
+
+            if (skin == skin1)
             {
                 foreach (Motor motor in motors)
                 {
@@ -1002,11 +1017,11 @@ namespace Zuzel
                     }
                 }
             }
-            
+
             fpsMonitor.Update();
-           
+
             base.Update(gameTime);
-         
+
         }
         /// <summary>
         /// This is called when the game should draw itself.
@@ -1030,12 +1045,12 @@ namespace Zuzel
             {
                 motorek.Draw(spriteBatch);
             }
-     
+
             //draw checkpoints
             //DrawCheckpoints();
-          
+
             spriteBatch.DrawString(fontArial10, winner.ToString(), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.3F, graphics.GraphicsDevice.Viewport.Height / 2.5F), Color.White);
-            if(showFps) fpsMonitor.Draw(spriteBatch, fontArial10, new Vector2(20, 20), Color.White);
+            if (showFps) fpsMonitor.Draw(spriteBatch, fontArial10, new Vector2(20, 20), Color.White);
 
             spriteBatch.End();
 
@@ -1087,7 +1102,7 @@ namespace Zuzel
             checkAiPointsList.Add(new Rectangle(575, 55, 1, 135));
             checkAiPointsList.Add(new Rectangle(340, 52, 60, 80));
             checkAiPointsList.Add(new Rectangle(205, 55, 1, 105));
-           // checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
+            // checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
             checkAiPointsList.Add(new Rectangle(33, 252, 134, 1));
             //checkAiPointsList.Add(new Rectangle(130, 332, 50, 50));
             checkAiPointsList.Add(new Rectangle(200, 342, 1, 125));
@@ -1139,14 +1154,14 @@ namespace Zuzel
             return min + (float)random.NextDouble() * (max - min);
         }
 
-        private void UpdateSmokePlume(float dt,int x , int y)
+        private void UpdateSmokePlume(float dt, int x, int y)
         {
             timeTillPuff -= dt;
             if (timeTillPuff < 0)
             {
                 Vector2 where = Vector2.Zero;
                 // add more particles at the bottom of the screen, halfway across.
-               
+
                 where.X = (float)x;
                 where.Y = (float)y;
                 smokePlume.AddParticles(where);
@@ -1158,10 +1173,10 @@ namespace Zuzel
 
         private void InitiateSave()
         {
-            
-                device = null;
-                StorageDevice.BeginShowSelector(PlayerIndex.One, this.SaveToDevice, null);
-            
+
+            device = null;
+            StorageDevice.BeginShowSelector(PlayerIndex.One, this.SaveToDevice, null);
+
         }
 
         void SaveToDevice(IAsyncResult result)
@@ -1171,11 +1186,11 @@ namespace Zuzel
             {
                 SaveGame SaveData = new SaveGame()
                 {
-                 skinSave = skin,
-                 soundONSave = soundON,
-                showFPSSave = showFps,
-                difficultySave = difficulty,
-                classicModeSave = classicMode
+                    skinSave = skin,
+                    soundONSave = soundON,
+                    showFPSSave = showFps,
+                    difficultySave = difficulty,
+                    classicModeSave = classicMode
                 };
                 IAsyncResult r = device.BeginOpenContainer(containerName, null, null);
                 result.AsyncWaitHandle.WaitOne();
@@ -1193,9 +1208,9 @@ namespace Zuzel
 
         private void InitiateLoad()
         {
-                device = null;
-                StorageDevice.BeginShowSelector(PlayerIndex.One, this.LoadFromDevice, null);
-            
+            device = null;
+            StorageDevice.BeginShowSelector(PlayerIndex.One, this.LoadFromDevice, null);
+
         }
 
         public void LoadFromDevice(IAsyncResult result)
@@ -1213,12 +1228,13 @@ namespace Zuzel
                 stream.Close();
                 container.Dispose();
                 //Update the game based on the save game file
-                
-                 //skin = SaveData.skinSave;
-                 soundON = SaveData.soundONSave;
-                 showFps = SaveData.showFPSSave;
-                 difficulty = SaveData.difficultySave;
-                 classicMode = SaveData.classicModeSave;
+
+                skin = SaveData.skinSave;
+                skin.mapTexture = Content.Load<Texture2D>(skin.background);
+                soundON = SaveData.soundONSave;
+                showFps = SaveData.showFPSSave;
+                difficulty = SaveData.difficultySave;
+                classicMode = SaveData.classicModeSave;
             }
         }
         private void MyExit()
@@ -1227,7 +1243,10 @@ namespace Zuzel
             this.Exit();
 
         }
-        
+
+
+
+
 
     }
 
