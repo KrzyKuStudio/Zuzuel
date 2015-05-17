@@ -165,8 +165,6 @@ namespace Zuzel
         float timeTillPuff = 0.0f;
 
 
-
-
         #endregion
 
         public Game1()
@@ -175,7 +173,6 @@ namespace Zuzel
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-
             IsMouseVisible = GameConstants.VISIBLEMOUSE;
             // set resolution
             graphics.PreferredBackBufferWidth = GameConstants.WINDOW_WIDTH;
@@ -183,8 +180,7 @@ namespace Zuzel
 
             smokePlume = new SmokePlumeParticleSystem(this, 13);
             Components.Add(smokePlume);
-            //  this.Components.Add(new GamerServicesComponent(this));
-        }
+                   }
 
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to
@@ -220,11 +216,12 @@ namespace Zuzel
             Skins();
             //default skint
             skin = skin1;
-            skin.mapTexture = skin1.mapTexture;
+        
             difficulty = Difficulty.Easy;
 
             InitiateLoad();
             mapTexture = skin.mapTexture;
+
             //check if images exists;
             try
             {
@@ -259,8 +256,6 @@ namespace Zuzel
             keyYup = false;
             keyIup = false;
             keyKup = false;
-
-
 
         }
 
@@ -1004,7 +999,7 @@ namespace Zuzel
             //update fog 
             float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            if (skin == skin1)
+            if (skin.skinName == "Skin1")
             {
                 foreach (Motor motor in motors)
                 {
