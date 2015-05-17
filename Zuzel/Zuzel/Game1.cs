@@ -1042,7 +1042,7 @@ namespace Zuzel
             }
 
             //draw checkpoints
-            //DrawCheckpoints();
+            DrawCheckpoints();
 
             spriteBatch.DrawString(fontArial10, winner.ToString(), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.3F, graphics.GraphicsDevice.Viewport.Height / 2.5F), Color.White);
             if (showFps) fpsMonitor.Draw(spriteBatch, fontArial10, new Vector2(20, 20), Color.White);
@@ -1082,26 +1082,26 @@ namespace Zuzel
         {
             checkPointsList = new List<Rectangle>();
 
-            checkPointsList.Add(new Rectangle(575, 332, 1, 135));
-            checkPointsList.Add(new Rectangle(655, 252, 130, 1));
-            checkPointsList.Add(new Rectangle(575, 35, 1, 135));
-            checkPointsList.Add(new Rectangle(205, 35, 1, 135));
-            checkPointsList.Add(new Rectangle(13, 252, 134, 1));
-            checkPointsList.Add(new Rectangle(200, 332, 1, 135));
+            checkPointsList.Add(new Rectangle((int)((575.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((332.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((135.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            checkPointsList.Add(new Rectangle((int)((655.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((252.0 / 500.0) * GameConstants.WINDOW_HEIGHT), (int)((130.0 / 800.0) * GameConstants.WINDOW_WIDTH), 1));
+            checkPointsList.Add(new Rectangle((int)((575.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((35.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((135.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            checkPointsList.Add(new Rectangle((int)((205.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((35.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((135.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            checkPointsList.Add(new Rectangle((int)((13.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((252.0 / 500.0) * GameConstants.WINDOW_HEIGHT), (int)((134.0 / 800.0) * GameConstants.WINDOW_WIDTH), 1));
+            checkPointsList.Add(new Rectangle((int)((200.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((332.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((135.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
 
             checkAiPointsList = new List<Rectangle>();
-            checkAiPointsList.Add(new Rectangle(575, 332, 1, 115));
-            //checkAiPointsList.Add(new Rectangle(630, 322, 60, 60));
-            checkAiPointsList.Add(new Rectangle(655, 252, 120, 1));
-            //checkAiPointsList.Add(new Rectangle(640, 132, 60, 60));
-            checkAiPointsList.Add(new Rectangle(575, 55, 1, 135));
-            checkAiPointsList.Add(new Rectangle(340, 52, 60, 80));
-            checkAiPointsList.Add(new Rectangle(205, 55, 1, 105));
-            // checkAiPointsList.Add(new Rectangle(120, 112, 60, 60));
-            checkAiPointsList.Add(new Rectangle(33, 252, 134, 1));
-            //checkAiPointsList.Add(new Rectangle(130, 332, 50, 50));
-            checkAiPointsList.Add(new Rectangle(200, 342, 1, 125));
-            //checkAiPointsList.Add(new Rectangle(340, 332, 30, 130));
+            checkAiPointsList.Add(new Rectangle((int)((575.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((332.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((115.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            //checkAiPointsList.Add(new Rectangle((int)((630.0/ 800.0) * GameConstants.WINDOW_WIDTH), 322, (int)((60.0/800.0)*GameConstants.WINDOW_WIDTH), 60));
+            checkAiPointsList.Add(new Rectangle((int)((655.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((252.0 / 500.0) * GameConstants.WINDOW_HEIGHT), (int)((120.0 / 800.0) * GameConstants.WINDOW_WIDTH), 1));
+            //checkAiPointsList.Add(new Rectangle((int)((640.0/ 800.0) * GameConstants.WINDOW_WIDTH), 132, (int)((60.0/800.0)*GameConstants.WINDOW_WIDTH), 60));
+            checkAiPointsList.Add(new Rectangle((int)((575.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((55.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((135.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            checkAiPointsList.Add(new Rectangle((int)((340.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((52.0 / 500.0) * GameConstants.WINDOW_HEIGHT), (int)((60.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((80.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            checkAiPointsList.Add(new Rectangle((int)((205.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((55.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((105.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            // checkAiPointsList.Add(new Rectangle((int)((120.0/ 800.0) * GameConstants.WINDOW_WIDTH), 112,(int)((60.0/800.0)*GameConstants.WINDOW_WIDTH), 60));
+            checkAiPointsList.Add(new Rectangle((int)((33.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((252.0 / 500.0) * GameConstants.WINDOW_HEIGHT), (int)((134.0 / 800.0) * GameConstants.WINDOW_WIDTH), 1));
+            //checkAiPointsList.Add(new Rectangle((int)((130.0/ 800.0) * GameConstants.WINDOW_WIDTH), 332, (int)((50.0/800.0)*GameConstants.WINDOW_WIDTH), 50));
+            checkAiPointsList.Add(new Rectangle((int)((200.0 / 800.0) * GameConstants.WINDOW_WIDTH), (int)((342.0 / 500.0) * GameConstants.WINDOW_HEIGHT), 1, (int)((125.0 / 500.0) * GameConstants.WINDOW_HEIGHT)));
+            //checkAiPointsList.Add(new Rectangle((int)((340.0/ 800.0) * GameConstants.WINDOW_WIDTH), 332, (int)((30.0/800.0)*GameConstants.WINDOW_WIDTH), 130));
         }
 
         private Vector2 AngleToVector(float angle)
