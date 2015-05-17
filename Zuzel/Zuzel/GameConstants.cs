@@ -11,7 +11,7 @@ namespace Zuzel
     {
         // resolution
         public const int WINDOW_WIDTH = 800;
-        public const int WINDOW_HEIGHT = 500;
+        public const int WINDOW_HEIGHT = 480;
 
         public const float MOTOR_ANGLE = 0.05F;
         public const float MOTOR_ACC_SPEED = 0.39F;
@@ -34,7 +34,7 @@ namespace Zuzel
         public const float MUSIC_VOL = 0.3F;
         public const float SFX_VOL = 0.4F;
 
-        public static Vector2 START_POS = new Vector2(430, 360);
+        public static Vector2 START_POS = new Vector2((int)(430.0 / 800.0 * WINDOW_WIDTH), (int)(360.0 / 500.0 * WINDOW_HEIGHT));
 
     }
 }

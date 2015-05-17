@@ -1028,8 +1028,8 @@ namespace Zuzel
 
             spriteBatch.Begin();
             // Draw texture
-
-            spriteBatch.Draw(mapTexture, mapPosition, Color.White);
+            spriteBatch.Draw(mapTexture, GraphicsDevice.Viewport.Bounds, Color.White);
+            //spriteBatch.Draw(mapTexture, mapPosition, Color.White);
             foreach (TireMark tireMark in tireMarks)
             {
                 tireMark.Draw(spriteBatch);
@@ -1042,7 +1042,7 @@ namespace Zuzel
             }
 
             //draw checkpoints
-            DrawCheckpoints();
+            //DrawCheckpoints();
 
             spriteBatch.DrawString(fontArial10, winner.ToString(), new Vector2(graphics.GraphicsDevice.Viewport.Width / 3.3F, graphics.GraphicsDevice.Viewport.Height / 2.5F), Color.White);
             if (showFps) fpsMonitor.Draw(spriteBatch, fontArial10, new Vector2(20, 20), Color.White);
@@ -1238,10 +1238,6 @@ namespace Zuzel
             this.Exit();
 
         }
-
-
-
-
 
     }
 

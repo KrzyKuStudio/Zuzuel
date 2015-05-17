@@ -5,20 +5,40 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zuzel", "Zuzel\Zuzel\Zuzel.csproj", "{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "ZuzelContent", "Zuzel\ZuzelContent\ZuzelContent.contentproj", "{0758960C-44DB-4270-A303-4DA25AC14568}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZuzelContent", "Zuzel\ZuzelContent\ZuzelContent.contentproj", "{0758960C-44DB-4270-A303-4DA25AC14568}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZuzeloWP", "ZuzeloWP\ZuzeloWP.csproj", "{72778D87-238A-4F25-AD7F-10098E8377EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
 		Debug|x86 = Debug|x86
+		Release|ARM = Release|ARM
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Debug|ARM.ActiveCfg = Debug|x86
 		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Debug|x86.ActiveCfg = Debug|x86
 		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Debug|x86.Build.0 = Debug|x86
+		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Release|ARM.ActiveCfg = Release|x86
 		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Release|x86.ActiveCfg = Release|x86
 		{C3184ABB-CE15-4ABB-8F68-6DB6AF4041FA}.Release|x86.Build.0 = Release|x86
+		{0758960C-44DB-4270-A303-4DA25AC14568}.Debug|ARM.ActiveCfg = Debug|x86
 		{0758960C-44DB-4270-A303-4DA25AC14568}.Debug|x86.ActiveCfg = Debug|x86
+		{0758960C-44DB-4270-A303-4DA25AC14568}.Release|ARM.ActiveCfg = Release|x86
 		{0758960C-44DB-4270-A303-4DA25AC14568}.Release|x86.ActiveCfg = Release|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|ARM.ActiveCfg = Debug|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|ARM.Build.0 = Debug|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|ARM.Deploy.0 = Debug|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|x86.ActiveCfg = Debug|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|x86.Build.0 = Debug|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Debug|x86.Deploy.0 = Debug|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|ARM.ActiveCfg = Release|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|ARM.Build.0 = Release|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|ARM.Deploy.0 = Release|ARM
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|x86.ActiveCfg = Release|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|x86.Build.0 = Release|x86
+		{72778D87-238A-4F25-AD7F-10098E8377EB}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
